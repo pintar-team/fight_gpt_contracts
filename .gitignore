@@ -1,0 +1,9 @@
+.deps
+.DS_Store
+scripts/__pycache__
+*/__pycache__
+*/__pycache__/*
+.pyc
+
+artifacts
+*/artifacts
