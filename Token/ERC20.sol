@@ -9,20 +9,18 @@ contract TestErc20Token is IERC20 {
     string public constant symbol = "TKN";
     uint8 public constant decimals = 18;
 
-
     mapping(address => uint256) balances;
-
     mapping(address => mapping (address => uint256)) allowed;
 
     uint256 totalSupply_ = 1000000000 ether;
 
 
-   constructor() {
-    balances[msg.sender] = totalSupply_;
+    constructor() {
+        balances[msg.sender] = totalSupply_;
     }
 
     function totalSupply() public override view returns (uint256) {
-    return totalSupply_;
+        return totalSupply_;
     }
 
     function balanceOf(address tokenOwner) public override view returns (uint256) {
