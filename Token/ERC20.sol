@@ -12,7 +12,7 @@ contract TestErc20Token is IERC20 {
     mapping(address => uint256) balances;
     mapping(address => mapping (address => uint256)) allowed;
 
-    uint256 totalSupply_ = 1000000000 ether;
+    uint256 totalSupply_ = 1000000000000000000000 ether;
 
 
     constructor() {
