@@ -30,8 +30,8 @@ contract TokenPreSale {
 
     // address > BNB amount
     mapping(address => uint256) public contribution;
-    // TODO: maybe bool!
-    mapping(address => uint8) public claim_state;
+    // address > maybe claimed
+    mapping(address => bool) public claim_state;
 
     event RefundContribution(
         uint256 amount,
@@ -148,5 +148,30 @@ contract TokenPreSale {
         total_contribution = new_total_contribution;
 
         ContrubutionAdded(_value, new_total_contribution);
+    }
+
+    function claim()
+        external
+        throwNotStarted
+        throwNotFinished
+        throwIfDeadline
+        ThrowIfCooldown
+    {
+        bool is_claimed = claim_state[msg.sender];
+        require(!is_claimed, "Already claimed");
+
+        uint256 current_contribution = contribution[msg.sender];
+        bool is_underlow = total_contribution < min;
+
+        if (is_underlow) {
+            payable(msg.sender).transfer(current_contribution);
+            RefundContribution(current_contribution, 0);
+        } else {
+            
+        }
+        // bool is_overflow = max_contribution < total;
+
+
+        claim_state[msg.sender] = true;
     }
 }
