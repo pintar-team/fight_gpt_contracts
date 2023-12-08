@@ -245,6 +245,22 @@ contract TokenPreSale {
         Finished();
     }
 
+    function fallbackRefund()
+        external
+        throwNotStarted
+        throwNotDeadline
+        throwIfFinished
+    {
+        require(!claim_state[msg.sender], "Already claimed");
+        uint256 current_contribution = contribution[msg.sender];
+
+        if (current_contribution > 0) {
+            RefundContribution(current_contribution, 0);
+            claim_state[msg.sender] = true;
+            payable(msg.sender).transfer(current_contribution);
+        }
+    }
+
     function muldiv(uint256 a, uint256 b, uint256 c) pure returns (uint256) {
         uint256 num = a * b;
         uint256 hv = num / c;
