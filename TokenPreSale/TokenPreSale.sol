@@ -18,6 +18,7 @@ contract TokenPreSale {
     uint256 public max_contribution;
 
     bool public isPaused = false;
+    bool public started  = false;
     bool public finished = false;
     bool public finished_fallback = false;
 
@@ -32,17 +33,13 @@ contract TokenPreSale {
     // TODO: maybe bool!
     mapping(address => uint8) public claim_state;
 
-    event TokensBought(
-        address indexed user,
-        uint256 tokensBought,
-        uint256 amountPaid,
-        uint256 timestamp
-    );
-
-    event TokensClaimed(
-        address indexed user,
+    event RefundContribution(
         uint256 amount,
-        uint256 timestamp
+        uint256 current_contribution
+    );
+    event ContrubutionAdded(
+        uint256 amount,
+        uint256 new_contribution
     );
 
     event PresalePaused(uint256 timestamp);
@@ -55,6 +52,12 @@ contract TokenPreSale {
 
     modifier onlyOwner() {
         require(msg.sender == owner, "Not the owner");
+        _;
+    }
+
+
+    modifier throwNotActive() {
+        require(block.number >= start_block && block.number < end_block, "Presale is not active");
         _;
     }
 
@@ -95,6 +98,11 @@ contract TokenPreSale {
         _;
     }
 
+    modifier throwNotStarted() {
+        require(started, "Presale is not started");
+        _;
+    }
+
     constructor(
         uint256 _token_price,
         uint256 _target_maximum, 
@@ -106,5 +114,39 @@ contract TokenPreSale {
         owner = msg.sender;
         min_contribution = _token_price * _target_minimum;
         max_contribution = _token_price * _target_maximum;
+    }
+
+    fallback() external payable {
+        contribute(msg.sender, msg.value);
+    }
+
+    function contribute(address _beneficiary, uint256 _value)
+        internal
+        onlyNotPaused
+        throwNotStarted
+        throwNotActive
+        throwIfFinished
+    {
+        uint256 token_amount = _value / token_price;
+
+        require(token_amount > 0, "invalid amount");
+
+        uint256 contribute_amount = token_amount * token_price;
+        uint256 current_contribution = contribution[_beneficiary];
+
+        if (_value > contribute_amount) {
+            uint256 refund_amount = _value - contribute_amount;
+            payable(msg.sender).transfer(refund_amount);
+            RefundContribution(refund_amount, current_contribution);
+        }
+
+        uint256 new_contribution = current_contribution + contribute_amount;
+        require(max_contribution < new_contribution, "Invalid amount");
+        uint256 new_total_contribution = total_contribution + contribute_amount;
+
+        contribution[_beneficiary] = new_contribution;
+        total_contribution = new_total_contribution;
+
+        ContrubutionAdded(_value, new_total_contribution);
     }
 }
