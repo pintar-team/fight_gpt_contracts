@@ -41,6 +41,9 @@ contract TokenPreSale {
         uint256 amount,
         uint256 new_contribution
     );
+    event TokenClaimed(
+        uint256 amount
+    );
 
     event PresalePaused(uint256 timestamp);
     event PresaleUnpaused(uint256 timestamp);
@@ -167,11 +170,56 @@ contract TokenPreSale {
             payable(msg.sender).transfer(current_contribution);
             RefundContribution(current_contribution, 0);
         } else {
-            
-        }
-        // bool is_overflow = max_contribution < total;
+            bool is_overflow = max_contribution < total;
+            uint256 real_contribution = this.getRealContribution(
+                is_overflow,
+                current_contribution
+            );
+            uint256 token_amount = real_contribution / token_price;
+            uint256 spend_amount = 0;
 
+            if (is_overflow) {
+                spend_amount = this.muldiv_up(current_contribution, max_contribution, total_contribution);
+            } else {
+                spend_amount = token_amount * token_price;
+            }
+
+            if (current_contribution > spend_amount) {
+                uint256 refund_amount = current_contribution - spend_amount;
+                payable(msg.sender).transfer(refund_amount);
+                RefundContribution(refund_amount, current_contribution);
+            }
+
+            if (token_amount > 0) {
+                token.transfer(msg.sender, token_amount);
+                TokenClaimed(token_amount);
+            }
+        }
 
         claim_state[msg.sender] = true;
+    }
+
+    function muldiv(uint256 a, uint256 b, uint256 c) pure returns (uint256) {
+        uint256 num = a * b;
+        uint256 hv = num / c;
+
+        return hv;
+    }
+
+    function muldiv_up(uint256 a, uint256 b, uint256 c) pure returns (uint256) {
+        uint256 num = a * b;
+        uint256 num_p = num + c;
+        uint256 num_p_1 = num_p - 1;
+        uint256 hv = num_p_1 / c;
+
+        return hv;
+    }
+
+    function getRealContribution(bool is_overflow, uint256 current_contribution) pure returns (uint256) {
+        if (is_overflow) {
+            return this.muldiv(current_contribution, max_contribution, total_contribution);
+        }
+
+        return current_contribution;
     }
 }
