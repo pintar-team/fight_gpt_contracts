@@ -33,6 +33,12 @@ contract TokenPreSale {
     // address > maybe claimed
     mapping(address => bool) public claim_state;
 
+    event SaleInitiated(
+        uint256 start_block,
+        uint256 end_block,
+        uint256 min_contribution,
+        uint256 max_contribution
+    );
     event RefundContribution(
         uint256 amount,
         uint256 current_contribution
@@ -259,6 +265,36 @@ contract TokenPreSale {
             claim_state[msg.sender] = true;
             payable(msg.sender).transfer(current_contribution);
         }
+    }
+
+    function initiateSale(uint256 duration)
+        external
+        onlyOwner
+        throwIfStarted
+    {
+        uint256 start_block = block.number + 1;
+        uint256 end_block = start + duration;
+
+        this.startSale(start_block, end_block);
+    }
+
+    function startSale(uint256 _startblock, uint256 _endblock) internal {
+        require(block.number < _startblock, "Invalid start block");
+        require(start < _endblock, "Invalid end block");
+
+        started = true;
+        start_block = _startblock;
+        end_block = _endblock;
+        deadline_block = _endblock + deadline;
+        min_contribution = token_price * target_minimum;
+        max_contribution = token_price * target_maximum;
+
+        SaleInitiated(
+            _startblock,
+            _endblock,
+            min_contribution,
+            max_contribution
+        );
     }
 
     function muldiv(uint256 a, uint256 b, uint256 c) pure returns (uint256) {
