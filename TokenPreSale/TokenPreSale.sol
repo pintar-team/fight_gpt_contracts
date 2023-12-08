@@ -1,15 +1,36 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity >=0.8.0 <0.9.0;
 
+import "../Token/ERC20.sol";
+
 contract TokenPreSale {
-    uint256 public deadline_block;
-    address public token_addr;
-    uint256 public start_token_price;
-    bool public isPaused;
-    address public owner;
+    ERC20Token public immutable token;
+    address public immutable owner;
+    uint256 public immutable token_price;
+    uint256 public immutable target_maximum;
+    uint256 public immutable target_minimum;
+    uint256 public immutable cooldown;
+    uint256 public immutable deadline;
+
+    // token_price * target_minimum
+    uint256 public min_contribution;
+    // token_price * target_maximum
+    uint256 public max_contribution;
+
+    bool public isPaused = false;
+    bool public finished = false;
+    bool public finished_fallback = false;
+
+    uint256 public total_contribution = 0;
+    uint256 public start_block = block.number;
+    uint256 public end_block = block.number;
+    uint256 public cooldown_block = block.number;
+    uint256 public deadline_block = block.number;
 
     // address > BNB amount
     mapping(address => uint256) public contribution;
+    // TODO: maybe bool!
+    mapping(address => uint8) public claim_state;
 
     event TokensBought(
         address indexed user,
@@ -37,38 +58,53 @@ contract TokenPreSale {
         _;
     }
 
-    modifier onlyActivePresale() {
-        // TODO: add end Presale by sale amount
-        require(block.number <= deadline_block, "Presale has ended");
+    modifier throwIfDeadline() {
+        bool isActive = (!finished && block.number < deadline_block);
+
+        require(isActive, "Presale is deadlines");
+        _;
+    }
+
+    modifier throwNotDeadline() {
+        require(block.number < deadline_block, "Presale is not deadline");
+        _;
+    }
+
+    modifier throwNotEnded() {
+        require(block.number < end_block, "Presale is not ended");
+        _;
+    }
+
+    modifier throwIfCooldown() {
+        require(block.number < cooldown_block, "Presale is cooldown");
+        _;
+    }
+
+    modifier throwNotFinished() {
+        require(finished, "Presale is not finished");
+        _;
+    }
+
+    modifier throwIfFinished() {
+        require(!finished, "Presale is finished");
+        _;
+    }
+
+    modifier throwIfFinishedFallback() {
+        require(!finished_fallback, "Presale is finished fallback");
         _;
     }
 
     constructor(
-        uint256 _deadline_block,
-        address _token_addr,
-        uint256 _start_token_price
+        uint256 _token_price,
+        uint256 _target_maximum, 
+        uint256 _target_minimum, 
+        uint256 _cooldown,
+        uint256 _deadline
     ) {
-        deadline_block = block.number + _deadline_block;
-        token_addr = _token_addr;
-        start_token_price = _start_token_price;
+        token = new ERC20Token();
         owner = msg.sender;
-    }
-
-    function buyTokensForBNB() external onlyNotPaused onlyActivePresale {
-        require(msg.value > 0, "Invalid amount");
-    }
-
-    function claimTokens() external {}
-
-    function pausePresale() external onlyOwner {
-        require(!isPaused, "Presale is already paused");
-        isPaused = true;
-        emit PresalePaused(block.timestamp);
-    }
-
-    function unpausePresale() external onlyOwner {
-        require(isPaused, "Presale is not paused");
-        isPaused = false;
-        emit PresaleUnpaused(block.timestamp);
+        min_contribution = _token_price * _target_minimum;
+        max_contribution = _token_price * _target_maximum;
     }
 }

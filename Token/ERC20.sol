@@ -3,7 +3,7 @@ pragma solidity >=0.8.0 <0.9.0;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
-contract TestErc20Token is IERC20 {
+contract ERC20Token is IERC20 {
 
     string public constant name = "TestErc20Token";
     string public constant symbol = "TKN";
