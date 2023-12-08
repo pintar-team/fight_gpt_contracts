@@ -44,6 +44,13 @@ contract TokenPreSale {
     event TokenClaimed(
         uint256 amount
     );
+    event RefundToken(
+        uint256 amount
+    );
+    event FundSale(
+        uint256 amount
+    );
+    event Finished();
 
     event PresalePaused(uint256 timestamp);
     event PresaleUnpaused(uint256 timestamp);
@@ -197,6 +204,45 @@ contract TokenPreSale {
         }
 
         claim_state[msg.sender] = true;
+    }
+
+    function finishSale()
+        external
+        throwNotStarted
+        throwNotEnded
+        throwIfFinished
+        throwIfDeadline
+    {
+        bool is_overflow = max_contribution < total_contribution;
+        bool is_underlow = total_contribution < min_contribution;
+
+        if (is_underlow) {
+            max_token_amount = max_contribution / token_price;
+            // TODO: replace to multisig wallet.
+            token.transfer(owner, max_token_amount);
+            RefundToken(max_token_amount);
+        } else {
+            uint256 fix_contribution = is_overflow ? max_contribution : total_contribution;
+            uint256 max_token_amount = max_contribution / token_price;
+            uint256 sold_token_amount = fix_contribution / token_price;
+            uint256 fund_amount = sold_token_amount / token_price;
+            uint256 refund_token_amount = max_token_amount - sold_token_amount;
+
+            if (fund_amount > 0) {
+                // TODO: replace to multisig wallet.
+                payable(owner).transfer(fund_amount);
+                FundSale(fund_amount);
+            }
+
+            if (refund_token_amount > 0) {
+                // TODO: replace to multisig wallet.
+                token.transfer(owner, refund_token_amount);
+                RefundToken(refund_token_amount);
+            }
+        }
+
+        cooldown_block = block.number + cooldown;
+        Finished();
     }
 
     function muldiv(uint256 a, uint256 b, uint256 c) pure returns (uint256) {
