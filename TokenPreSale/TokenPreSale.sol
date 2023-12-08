@@ -17,7 +17,6 @@ contract TokenPreSale {
     // token_price * target_maximum
     uint256 public max_contribution;
 
-    bool public isPaused = false;
     bool public started  = false;
     bool public finished = false;
     bool public finished_fallback = false;
@@ -58,19 +57,10 @@ contract TokenPreSale {
     );
     event Finished();
 
-    event PresalePaused(uint256 timestamp);
-    event PresaleUnpaused(uint256 timestamp);
-
-    modifier onlyNotPaused() {
-        require(!isPaused, "Presale is paused");
-        _;
-    }
-
     modifier onlyOwner() {
         require(msg.sender == owner, "Not the owner");
         _;
     }
-
 
     modifier throwNotActive() {
         require(block.number >= start_block && block.number < end_block, "Presale is not active");
@@ -130,6 +120,8 @@ contract TokenPreSale {
         owner = msg.sender;
         min_contribution = _token_price * _target_minimum;
         max_contribution = _token_price * _target_maximum;
+        cooldown = _cooldown;
+        deadline = _deadline;
     }
 
     fallback() external payable {
