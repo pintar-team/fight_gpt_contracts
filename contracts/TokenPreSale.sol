@@ -17,7 +17,7 @@ contract TokenPreSale {
     // token_price * target_maximum
     uint256 public max_contribution;
 
-    bool public started  = false;
+    bool public started = false;
     bool public finished = false;
     bool public finished_fallback = false;
 
@@ -38,23 +38,11 @@ contract TokenPreSale {
         uint256 min_contribution,
         uint256 max_contribution
     );
-    event RefundContribution(
-        uint256 amount,
-        uint256 current_contribution
-    );
-    event ContrubutionAdded(
-        uint256 amount,
-        uint256 new_contribution
-    );
-    event TokenClaimed(
-        uint256 amount
-    );
-    event RefundToken(
-        uint256 amount
-    );
-    event FundSale(
-        uint256 amount
-    );
+    event RefundContribution(uint256 amount, uint256 current_contribution);
+    event ContrubutionAdded(uint256 amount, uint256 new_contribution);
+    event TokenClaimed(uint256 amount);
+    event RefundToken(uint256 amount);
+    event FundSale(uint256 amount);
     event Finished();
 
     modifier onlyOwner() {
@@ -63,7 +51,10 @@ contract TokenPreSale {
     }
 
     modifier throwNotActive() {
-        require(block.number >= start_block && block.number < end_block, "Presale is not active");
+        require(
+            block.number >= start_block && block.number < end_block,
+            "Presale is not active"
+        );
         _;
     }
 
@@ -116,8 +107,8 @@ contract TokenPreSale {
 
     constructor(
         uint256 _token_price,
-        uint256 _target_maximum, 
-        uint256 _target_minimum, 
+        uint256 _target_maximum,
+        uint256 _target_minimum,
         uint256 _cooldown,
         uint256 _deadline
     ) {
@@ -133,8 +124,7 @@ contract TokenPreSale {
         contribute(msg.sender, msg.value);
     }
 
-    receive() external payable {
-    }
+    receive() external payable {}
 
     function contribute(address _beneficiary, uint256 _value)
         internal
@@ -191,7 +181,11 @@ contract TokenPreSale {
             uint256 spend_amount = 0;
 
             if (is_overflow) {
-                spend_amount = this.muldiv_up(current_contribution, max_contribution, total_contribution);
+                spend_amount = this.muldiv_up(
+                    current_contribution,
+                    max_contribution,
+                    total_contribution
+                );
             } else {
                 spend_amount = token_amount * token_price;
             }
@@ -227,7 +221,9 @@ contract TokenPreSale {
             token.transfer(owner, max_token_amount);
             emit RefundToken(max_token_amount);
         } else {
-            uint256 fix_contribution = is_overflow ? max_contribution : total_contribution;
+            uint256 fix_contribution = is_overflow
+                ? max_contribution
+                : total_contribution;
             uint256 max_token_amount = max_contribution / token_price;
             uint256 sold_token_amount = fix_contribution / token_price;
             uint256 fund_amount = sold_token_amount / token_price;
@@ -266,11 +262,7 @@ contract TokenPreSale {
         }
     }
 
-    function initiateSale(uint256 duration)
-        external
-        onlyOwner
-        throwIfStarted
-    {
+    function initiateSale(uint256 duration) external onlyOwner throwIfStarted {
         uint256 start = block.number + 1;
         uint256 end = start + duration;
 
@@ -296,14 +288,22 @@ contract TokenPreSale {
         );
     }
 
-    function muldiv(uint256 a, uint256 b, uint256 c) public pure returns (uint256) {
+    function muldiv(
+        uint256 a,
+        uint256 b,
+        uint256 c
+    ) public pure returns (uint256) {
         uint256 num = a * b;
         uint256 hv = num / c;
 
         return hv;
     }
 
-    function muldiv_up(uint256 a, uint256 b, uint256 c) public pure returns (uint256) {
+    function muldiv_up(
+        uint256 a,
+        uint256 b,
+        uint256 c
+    ) public pure returns (uint256) {
         uint256 num = a * b;
         uint256 num_p = num + c;
         uint256 num_p_1 = num_p - 1;
@@ -312,9 +312,18 @@ contract TokenPreSale {
         return hv;
     }
 
-    function getRealContribution(bool is_overflow, uint256 current_contribution) public view returns (uint256) {
+    function getRealContribution(bool is_overflow, uint256 current_contribution)
+        public
+        view
+        returns (uint256)
+    {
         if (is_overflow) {
-            return muldiv(current_contribution, max_contribution, total_contribution);
+            return
+                muldiv(
+                    current_contribution,
+                    max_contribution,
+                    total_contribution
+                );
         }
 
         return current_contribution;
