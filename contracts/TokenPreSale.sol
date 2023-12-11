@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: GPL-3.0
 pragma solidity >=0.8.0 <0.9.0;
 
-import "../Token/ERC20.sol";
+import "./ERC20.sol";
 
 contract TokenPreSale {
     ERC20Token public immutable token;
@@ -114,24 +114,26 @@ contract TokenPreSale {
     ) {
         token = new ERC20Token();
         owner = msg.sender;
+        token_price = _token_price;
+        target_maximum = _target_maximum;
+        target_minimum = _target_minimum;
         min_contribution = _token_price * _target_minimum;
         max_contribution = _token_price * _target_maximum;
         cooldown = _cooldown;
         deadline = _deadline;
     }
 
-    fallback() external payable {
-        contribute(msg.sender, msg.value);
-    }
-
-    receive() external payable {}
-
-    function contribute(address _beneficiary, uint256 _value)
-        internal
+    function contribute()
+        external
+        payable
         throwNotStarted
         throwNotActive
         throwIfFinished
     {
+        require(msg.sender != address(0), "Zero token address");
+
+        address _beneficiary = msg.sender;
+        uint256 _value = msg.value;
         uint256 token_amount = _value / token_price;
 
         require(token_amount > 0, "invalid amount");
