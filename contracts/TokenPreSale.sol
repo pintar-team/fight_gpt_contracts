@@ -148,7 +148,7 @@ contract TokenPreSale {
         }
 
         uint256 new_contribution = current_contribution + contribute_amount;
-        require(max_contribution < new_contribution, "Invalid amount");
+        require(new_contribution <= max_contribution, "Invalid amount");
         uint256 new_total_contribution = total_contribution + contribute_amount;
 
         contribution[_beneficiary] = new_contribution;
