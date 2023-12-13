@@ -95,6 +95,10 @@ contract Item is
         return super.tokenURI(tokenId);
     }
 
+    function getEffectsID(uint256 _tokenID) public view returns (uint64) {
+        return effectsId[_tokenID];
+    }
+
     function supportsInterface(bytes4 interfaceId)
         public
         view

@@ -51,5 +51,30 @@ describe("Item contract", function () {
         it("interface not supports", async function () {
             expect(await item.supportsInterface("0x12345678")).to.equal(false);
         });
+
+        it("try mint a token", async function () {
+            const tokenId = 1;
+            const tokenURI = "http://example.com/token1";
+            const effectID = 333;
+
+            await item.safeMint(addr1.address, tokenId, tokenURI, effectID);
+            expect(await item.ownerOf(tokenId)).to.equal(addr1.address);
+            expect(await item.tokenURI(tokenId)).to.equal(tokenURI);
+            expect(await item.getEffectsID(tokenId)).to.equal(effectID);
+        });
+
+        it("try Batch Minting tokens", async function () {
+            const effects = [123, 456, 789];
+            const numberOfTokens = effects.length;
+
+            await item.batchMint(addr2.address, effects);
+
+            const totalSupply = await item.totalSupply();
+
+            expect(numberOfTokens).to.equal(totalSupply);
+            expect(await item.getEffectsID(1)).to.equal(123);
+            expect(await item.getEffectsID(2)).to.equal(456);
+            expect(await item.getEffectsID(3)).to.equal(789);
+        });
     });
 });
