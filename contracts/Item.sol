@@ -95,6 +95,12 @@ contract Item is
         return super.tokenURI(tokenId);
     }
 
+    function burn(uint256 tokenId) public override {
+        super.burn(tokenId);
+        delete receiver[tokenId];
+        delete royaltyPercentage[tokenId];
+    }
+
     function getEffectsID(uint256 _tokenID) public view returns (uint64) {
         return effectsId[_tokenID];
     }

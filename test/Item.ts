@@ -75,6 +75,7 @@ describe("Item contract", function () {
             expect(await item.getEffectsID(1)).to.equal(123);
             expect(await item.getEffectsID(2)).to.equal(456);
             expect(await item.getEffectsID(3)).to.equal(789);
+            console.log(item.interface);
         });
     });
 });
