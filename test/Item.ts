@@ -26,39 +26,30 @@ describe("Item contract", function () {
         });
 
         it("Should set the right minter", async function () {
-            // console.log(item.interface);
             const role = await item.MINTER_ROLE();
             expect(await item.hasRole(role, owner.address)).to.equal(true);
             expect(await item.hasRole(role, addr1.address)).to.equal(false);
         });
 
-    //     it("Should assign the total supply of tokens to the owner", async function () {
-    //         const ownerBalance = await item.balanceOf(owner.address);
-    //         expect(await item.totalSupply()).to.equal(ownerBalance);
-    //     });
-    // });
+        it("Should zero totalSupply", async function () {
+            const totalSupply = await item.totalSupply();
+            expect(totalSupply).to.equal(0n);
+        });
 
-    // describe("Transactions", function () {
-    //     it("Should transfer tokens between accounts", async function () {
-    //         await item.safeMint(addr1.address, 1);
-    //         const addr1Balance = await item.balanceOf(addr1.address);
-    //         expect(addr1Balance).to.equal(1);
+        it("ERC721 interface supports", async function () {
+            expect(await item.supportsInterface("0x80ac58cd")).to.equal(true);
+        });
 
-    //         await item.connect(addr1).transferFrom(addr1.address, addr2.address, 1);
-    //         const addr2Balance = await item.balanceOf(addr2.address);
-    //         expect(addr2Balance).to.equal(1);
-    //     });
+        it("ERC721Enumerable interface supports", async function () {
+            expect(await item.supportsInterface("0x780e9d63")).to.equal(true);
+        });
 
-    //     it("Should fail if sender doesn’t have enough tokens", async function () {
-    //         const initialOwnerBalance = await item.balanceOf(owner.address);
+        it("ERC2981 interface supports", async function () {
+            expect(await item.supportsInterface("0x2a55205a")).to.equal(true);
+        });
 
-    //         await expect(
-    //             item.connect(addr1).transferFrom(addr1.address, owner.address, 1)
-    //         ).to.be.revertedWith("ERC721: transfer caller is not owner nor approved");
-
-    //         expect(await item.balanceOf(owner.address)).to.equal(
-    //             initialOwnerBalance
-    //         );
-    //     });
+        it("interface not supports", async function () {
+            expect(await item.supportsInterface("0x12345678")).to.equal(false);
+        });
     });
 });
