@@ -81,11 +81,14 @@ describe("Item contract", function () {
             const tokenId = 1;
             const tokenURI = "1";
             const effectID = 333;
+            const to = addrs[0];
 
-            await item.safeMint(addr1.address, tokenId, tokenURI, effectID);
+            await item.safeMint(to, tokenId, tokenURI, effectID);
 
-            const info = await item.royaltyInfo(1, 5000);
-            console.log(info);
+            const [owner, rewards] = await item.royaltyInfo(1, 5000);
+
+            expect(owner).to.equal(to);
+            expect(rewards).to.equal(250n);
         });
     });
 });
