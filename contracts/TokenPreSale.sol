@@ -140,15 +140,16 @@ contract TokenPreSale {
 
         uint256 contribute_amount = token_amount * token_price;
         uint256 current_contribution = contribution[_beneficiary];
+        uint256 new_contribution = current_contribution + contribute_amount;
+
+        require(new_contribution <= max_contribution, "Invalid amount");
 
         if (_value > contribute_amount) {
             uint256 refund_amount = _value - contribute_amount;
             payable(msg.sender).transfer(refund_amount);
-            emit RefundContribution(refund_amount, current_contribution);
+            emit RefundContribution(refund_amount, new_contribution);
         }
 
-        uint256 new_contribution = current_contribution + contribute_amount;
-        require(new_contribution <= max_contribution, "Invalid amount");
         uint256 new_total_contribution = total_contribution + contribute_amount;
 
         contribution[_beneficiary] = new_contribution;
