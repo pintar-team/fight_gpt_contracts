@@ -20,7 +20,10 @@ contract Item is
     using SafeCast for uint256;
 
     bytes4 private constant _INTERFACE_ID_ERC2981 = 0x2a55205a;
+
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
+    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
+
     uint96 public percentageBasisPoints = 500; // 5%
     string private baseURI;
 
