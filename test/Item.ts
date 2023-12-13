@@ -75,7 +75,17 @@ describe("Item contract", function () {
             expect(await item.getEffectsID(1)).to.equal(123);
             expect(await item.getEffectsID(2)).to.equal(456);
             expect(await item.getEffectsID(3)).to.equal(789);
-            console.log(item.interface);
+        });
+
+        it("try mint a token and check royaltyInfo", async function () {
+            const tokenId = 1;
+            const tokenURI = "1";
+            const effectID = 333;
+
+            await item.safeMint(addr1.address, tokenId, tokenURI, effectID);
+
+            const info = await item.royaltyInfo(1, 5000);
+            console.log(info);
         });
     });
 });

@@ -50,6 +50,7 @@ contract Item is
         _setTokenURI(tokenId, uri);
         effectsId[tokenId] = effectID;
         _setRoyaltyPercentage(tokenId, percentageBasisPoints);
+        _setReceiver(tokenId, to);
     }
 
     function batchMint(address _to, uint64[] memory _effects)
@@ -92,6 +93,7 @@ contract Item is
         override(ERC721, ERC721URIStorage)
         returns (string memory)
     {
+        // TODO: make const uri
         return super.tokenURI(tokenId);
     }
 
