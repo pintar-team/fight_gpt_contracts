@@ -120,5 +120,17 @@ describe("Item contract", function () {
             expect(await item.getEffectsID(tokenId)).to.equal(0n);
             expect(await item.getNumbersOfEffects(tokenId)).to.equal(0n);
         });
+
+        it("test approve for burn", async function () {
+            const tokenId = 1;
+            const tokenURI = "1";
+            const effectID = 333;
+            const effects_number = 22;
+            const to = addrs[0];
+
+            await item.safeMint(to, tokenId, tokenURI, effectID, effects_number);
+            await item.connect(to).approve(addr2, tokenId);
+            await item.connect(addr2).burn(tokenId);
+        });
     });
 });
