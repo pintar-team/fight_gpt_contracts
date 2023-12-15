@@ -42,7 +42,7 @@ contract Effect {
         owner = msg.sender;
     }
 
-    function setItem(address _new_item_contract) external onlyOwner {
+    function setItemContract(address _new_item_contract) external onlyOwner {
         Item new_tem_token = Item(_new_item_contract);
         emit ItemContractChanged(
             item_token,
@@ -57,7 +57,7 @@ contract Effect {
     }
 
     // can call only fight contract!s
-    function mint(uint64[] memory _effects, uint8[] memory _number_effects) {
+    function batchMint(address _to, uint64[] memory _effects, uint8[] memory _number_effects) external {
         require(_effects.length == _number_effects.length, "Invalid input params");
 
         uint256 total_supply = item_token.totalSupply() + 1;
@@ -70,12 +70,12 @@ contract Effect {
             require(effect_number > 0, "Invalid effect_number");
 
             item_token.safeMint(_to, tokenID, Strings.toString(tokenID));
-            effects[tokenID] = EffectData(effectsId, number_effects);
+            effects[tokenID] = EffectData(effectID, effect_number);
         }
     }
 
-    function getEffect(uint256 _tokenID) public view returns (uint8 effects, uint64 effectId) {
-        effects = effects[_tokenID].number_effects;
-        effectId = effects[_tokenID].effectsId;
+    function getEffect(uint256 _tokenID) public view returns (uint8 _effects, uint64 _effectId) {
+        _effects = effects[_tokenID].number_effects;
+        _effectId = effects[_tokenID].effectsId;
     }
 }

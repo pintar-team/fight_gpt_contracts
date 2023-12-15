@@ -46,16 +46,6 @@ contract HeroesGPT is
         _setRoyaltyPercentage(tokenId, percentageBasisPoints);
     }
 
-    function batchMint(address _to, uint256 _amount)
-        external
-        onlyRole(MINTER_ROLE)
-    {
-        uint256 total_supply = totalSupply();
-        for (uint32 i = total_supply; i < _amount; i++) {
-            safeMint(_to, i, Strings.toString(i));
-        }
-    }
-
     function _setBaseURI(string memory _newBaseURI)
         external
         onlyRole(MINTER_ROLE)

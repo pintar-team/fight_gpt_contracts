@@ -41,23 +41,11 @@ contract Item is
     function safeMint(
         address to,
         uint256 tokenId,
-        string memory uri,
-        uint64 effectID
+        string memory uri
     ) public onlyRole(MINTER_ROLE) {
         _safeMint(to, tokenId);
         _setTokenURI(tokenId, uri);
         _setRoyaltyPercentage(tokenId, percentageBasisPoints);
-    }
-
-    function batchMint(address _to, uint64[] memory _effects)
-        external
-        onlyRole(MINTER_ROLE)
-    {
-        for (uint32 i = 0; i < _effects.length; i++) {
-            uint256 _tokenID = totalSupply() + 1;
-            uint64 _effectID = _effects[i];
-            safeMint(_to, _tokenID, Strings.toString(_tokenID), _effectID);
-        }
     }
 
     function _setBaseURI(string memory _newBaseURI)
@@ -96,8 +84,6 @@ contract Item is
     function burn(uint256 tokenId) public override {
         super.burn(tokenId);
         delete receiver[tokenId];
-        delete number_effects[tokenId];
-        delete effectsId[tokenId];
         delete royaltyPercentage[tokenId];
     }
 
