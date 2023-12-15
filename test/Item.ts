@@ -98,5 +98,27 @@ describe("Item contract", function () {
             expect(owner).to.equal(to.address);
             expect(rewards).to.equal(250n);
         });
+
+        it("try mint a token and burn it", async function () {
+            const tokenId = 1;
+            const tokenURI = "1";
+            const effectID = 333;
+            const effects_number = 22;
+
+            await item.safeMint(owner, tokenId, tokenURI, effectID, effects_number);
+            const totalSupply = await item.totalSupply();
+
+            expect(totalSupply).to.equal(tokenId);
+            expect(await item.getEffectsID(tokenId)).to.equal(effectID);
+            expect(await item.getNumbersOfEffects(1)).to.equal(effects_number);
+
+            await item.burn(tokenId);
+
+            const new_totalSupply = await item.totalSupply();
+
+            expect(new_totalSupply).to.equal(0n);
+            expect(await item.getEffectsID(tokenId)).to.equal(0n);
+            expect(await item.getNumbersOfEffects(tokenId)).to.equal(0n);
+        });
     });
 });
