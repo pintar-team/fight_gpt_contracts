@@ -19,8 +19,12 @@ contract Effect {
     HeroesGPT public char_token;
     Item public item_token;
 
-    // tokens >> effects
+    // item >> effects
     mapping(uint256 => EffectData) public effects;
+    // charID >> effectID
+    mapping(uint256 => uint256[]) public char_effect;
+    // itemOwner >> itemID
+    mapping(uint256 => uint256) public items_owner;
 
     event ItemContractChanged(
         Item oldContract,
@@ -50,11 +54,28 @@ contract Effect {
 
     function takeThePill(uint256 _charID, uint256 _itemID) external {
         require(char_token.ownerOf(_charID) == msg.sender, "sender is not char owner");
+    }
 
-        uint64 effectsId = item_token.getEffectsID(_itemID);
-        uint8 number_effects = item_token.getNumbersOfEffects(_itemID);
+    // can call only fight contract!s
+    function mint(uint64[] memory _effects, uint8[] memory _number_effects) {
+        require(_effects.length == _number_effects.length, "Invalid input params");
 
-        item_token.burn(_itemID);
-        effects[_charID] = EffectData(effectsId, number_effects);
+        uint256 total_supply = item_token.totalSupply() + 1;
+
+        for (uint32 i = 0; i < _effects.length; i++) {
+            uint256 tokenID = total_supply + i;
+            uint64 effectID = _effects[i];
+            uint8 effect_number = _number_effects[i];
+
+            require(effect_number > 0, "Invalid effect_number");
+
+            item_token.safeMint(_to, tokenID, Strings.toString(tokenID));
+            effects[tokenID] = EffectData(effectsId, number_effects);
+        }
+    }
+
+    function getEffect(uint256 _tokenID) public view returns (uint8 effects, uint64 effectId) {
+        effects = effects[_tokenID].number_effects;
+        effectId = effects[_tokenID].effectsId;
     }
 }

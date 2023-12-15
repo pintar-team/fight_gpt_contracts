@@ -24,7 +24,6 @@ contract HeroesGPT is
     uint96 public percentageBasisPoints = 500; // 5%
     string private baseURI;
 
-    mapping(uint256 => uint64) internal effectsId;
     mapping(uint256 => address) receiver;
     mapping(uint256 => uint256) royaltyPercentage;
 
@@ -40,23 +39,20 @@ contract HeroesGPT is
     function safeMint(
         address to,
         uint256 tokenId,
-        string memory uri,
-        uint64 effectID
+        string memory uri
     ) public onlyRole(MINTER_ROLE) {
         _safeMint(to, tokenId);
         _setTokenURI(tokenId, uri);
-        effectsId[tokenId] = effectID;
         _setRoyaltyPercentage(tokenId, percentageBasisPoints);
     }
 
-    function batchMint(address _to, uint64[] memory _effects)
+    function batchMint(address _to, uint256 _amount)
         external
         onlyRole(MINTER_ROLE)
     {
-        for (uint32 i = 0; i < _effects.length; i++) {
-            uint256 _tokenID = totalSupply() + 1;
-            uint64 _effectID = _effects[i];
-            safeMint(_to, _tokenID, Strings.toString(_tokenID), _effectID);
+        uint256 total_supply = totalSupply();
+        for (uint32 i = total_supply; i < _amount; i++) {
+            safeMint(_to, i, Strings.toString(i));
         }
     }
 
