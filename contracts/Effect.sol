@@ -59,6 +59,7 @@ contract Effect {
     // can call only fight contract!s
     function batchMint(address _to, uint64[] memory _effects, uint8[] memory _number_effects) external {
         require(_effects.length == _number_effects.length, "Invalid input params");
+        require(_to != address(0), "invalid recipient");
 
         uint256 total_supply = item_token.totalSupply() + 1;
 
