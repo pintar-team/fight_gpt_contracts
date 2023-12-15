@@ -20,7 +20,6 @@ contract Item is
     using SafeCast for uint256;
 
     bytes4 private constant _INTERFACE_ID_ERC2981 = 0x2a55205a;
-
     bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
     bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
 
@@ -28,6 +27,7 @@ contract Item is
     string private baseURI;
 
     mapping(uint256 => uint64) internal effectsId;
+    mapping(uint256 => uint8) internal number_effects;
     mapping(uint256 => address) receiver;
     mapping(uint256 => uint256) royaltyPercentage;
 
@@ -44,23 +44,29 @@ contract Item is
         address to,
         uint256 tokenId,
         string memory uri,
-        uint64 effectID
+        uint64 effectID,
+        uint8 effect_number
     ) public onlyRole(MINTER_ROLE) {
+        require(effect_number > 0, "invalid effect_number should be > 0");
         _safeMint(to, tokenId);
         _setTokenURI(tokenId, uri);
         effectsId[tokenId] = effectID;
+        number_effects[tokenId] = effect_number;
         _setRoyaltyPercentage(tokenId, percentageBasisPoints);
         _setReceiver(tokenId, to);
     }
 
-    function batchMint(address _to, uint64[] memory _effects)
+    function batchMint(address _to, uint64[] memory _effects, uint8[] memory _number_effects)
         external
         onlyRole(MINTER_ROLE)
     {
+        require(_effects.length == _number_effects.length, "Invalid input params");
+
         for (uint32 i = 0; i < _effects.length; i++) {
-            uint256 _tokenID = totalSupply() + 1;
-            uint64 _effectID = _effects[i];
-            safeMint(_to, _tokenID, Strings.toString(_tokenID), _effectID);
+            uint256 tokenID = totalSupply() + 1;
+            uint64 effectID = _effects[i];
+            uint8 effect_number = _number_effects[i];
+            safeMint(_to, tokenID, Strings.toString(tokenID), effectID, effect_number);
         }
     }
 
@@ -100,11 +106,17 @@ contract Item is
     function burn(uint256 tokenId) public override {
         super.burn(tokenId);
         delete receiver[tokenId];
+        delete number_effects[tokenId];
+        delete effectsId[tokenId];
         delete royaltyPercentage[tokenId];
     }
 
     function getEffectsID(uint256 _tokenID) public view returns (uint64) {
         return effectsId[_tokenID];
+    }
+
+    function getNumbersOfEffects(uint256 _tokenID) public view returns (uint8) {
+        return number_effects[_tokenID];
     }
 
     function supportsInterface(bytes4 interfaceId)

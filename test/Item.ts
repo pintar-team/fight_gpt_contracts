@@ -56,18 +56,21 @@ describe("Item contract", function () {
             const tokenId = 1;
             const tokenURI = "http://example.com/token1";
             const effectID = 333;
+            const effects = 254;
 
-            await item.safeMint(addr1.address, tokenId, tokenURI, effectID);
+            await item.safeMint(addr1.address, tokenId, tokenURI, effectID, effects);
             expect(await item.ownerOf(tokenId)).to.equal(addr1.address);
             expect(await item.tokenURI(tokenId)).to.equal(tokenURI);
             expect(await item.getEffectsID(tokenId)).to.equal(effectID);
+            expect(await item.getNumbersOfEffects(tokenId)).to.equal(effects);
         });
 
         it("try Batch Minting tokens", async function () {
             const effects = [123, 456, 789];
+            const number_effects = [10, 1, 2];
             const numberOfTokens = effects.length;
 
-            await item.batchMint(addr2.address, effects);
+            await item.batchMint(addr2.address, effects, number_effects);
 
             const totalSupply = await item.totalSupply();
 
@@ -75,19 +78,24 @@ describe("Item contract", function () {
             expect(await item.getEffectsID(1)).to.equal(123);
             expect(await item.getEffectsID(2)).to.equal(456);
             expect(await item.getEffectsID(3)).to.equal(789);
+
+            expect(await item.getNumbersOfEffects(1)).to.equal(10);
+            expect(await item.getNumbersOfEffects(2)).to.equal(1);
+            expect(await item.getNumbersOfEffects(3)).to.equal(2);
         });
 
         it("try mint a token and check royaltyInfo", async function () {
             const tokenId = 1;
             const tokenURI = "1";
             const effectID = 333;
+            const effects_number = 1;
             const to = addrs[0];
 
-            await item.safeMint(to, tokenId, tokenURI, effectID);
+            await item.safeMint(to, tokenId, tokenURI, effectID, effects_number);
 
             const [owner, rewards] = await item.royaltyInfo(1, 5000);
 
-            expect(owner).to.equal(to);
+            expect(owner).to.equal(to.address);
             expect(rewards).to.equal(250n);
         });
     });
