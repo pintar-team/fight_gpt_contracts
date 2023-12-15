@@ -5,7 +5,6 @@ import "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import "./Item.sol";
 import "./Char.sol";
 
-
 contract Effect {
     using SafeCast for uint256;
 
@@ -26,10 +25,7 @@ contract Effect {
     // itemOwner >> itemID
     mapping(address => uint256) public items_owner;
 
-    event ItemContractChanged(
-        Item oldContract,
-        Item newContract
-    );
+    event ItemContractChanged(Item oldContract, Item newContract);
 
     modifier onlyOwner() {
         require(msg.sender == owner, "sender is not owner");
@@ -54,16 +50,19 @@ contract Effect {
 
     function setItemContract(address _new_item_contract) external onlyOwner {
         Item new_tem_token = Item(_new_item_contract);
-        emit ItemContractChanged(
-            item_token,
-            new_tem_token
-        );
+        emit ItemContractChanged(item_token, new_tem_token);
 
         item_token = new_tem_token;
     }
 
-    function takeThePill(uint256 _charID, uint256 _itemID) external onlyNotContract {
-        require(char_token.ownerOf(_charID) == msg.sender, "sender is not char owner");
+    function takeThePill(uint256 _charID, uint256 _itemID)
+        external
+        onlyNotContract
+    {
+        require(
+            char_token.ownerOf(_charID) == msg.sender,
+            "sender is not char owner"
+        );
 
         item_token.transferFrom(msg.sender, address(this), _itemID);
 
@@ -72,8 +71,15 @@ contract Effect {
     }
 
     // can call only fight contract!s
-    function batchMint(address _to, uint64[] memory _effects, uint8[] memory _number_effects) external {
-        require(_effects.length == _number_effects.length, "Invalid input params");
+    function batchMint(
+        address _to,
+        uint64[] memory _effects,
+        uint8[] memory _number_effects
+    ) external {
+        require(
+            _effects.length == _number_effects.length,
+            "Invalid input params"
+        );
         require(_to != address(0), "invalid recipient");
 
         uint256 total_supply = item_token.totalSupply() + 1;
@@ -90,7 +96,11 @@ contract Effect {
         }
     }
 
-    function getEffect(uint256 _tokenID) public view returns (uint8 _effects, uint64 _effectId) {
+    function getEffect(uint256 _tokenID)
+        public
+        view
+        returns (uint8 _effects, uint64 _effectId)
+    {
         _effects = effects[_tokenID].number_effects;
         _effectId = effects[_tokenID].effectsId;
     }
