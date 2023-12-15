@@ -21,10 +21,10 @@ contract Effect {
 
     // item >> effects
     mapping(uint256 => EffectData) public effects;
-    // charID >> effectID
+    // charID >> itemIDs
     mapping(uint256 => uint256[]) public char_effect;
     // itemOwner >> itemID
-    mapping(uint256 => uint256) public items_owner;
+    mapping(address => uint256) public items_owner;
 
     event ItemContractChanged(
         Item oldContract,
@@ -33,6 +33,16 @@ contract Effect {
 
     modifier onlyOwner() {
         require(msg.sender == owner, "sender is not owner");
+        _;
+    }
+
+    modifier onlyNotContract() {
+        uint32 size;
+        address _addr = msg.sender;
+        assembly {
+            size := extcodesize(_addr)
+        }
+        require(size == 0, "sender is contract");
         _;
     }
 
@@ -52,8 +62,13 @@ contract Effect {
         item_token = new_tem_token;
     }
 
-    function takeThePill(uint256 _charID, uint256 _itemID) external {
+    function takeThePill(uint256 _charID, uint256 _itemID) external onlyNotContract {
         require(char_token.ownerOf(_charID) == msg.sender, "sender is not char owner");
+
+        item_token.transferFrom(msg.sender, address(this), _itemID);
+
+        items_owner[msg.sender] = _itemID;
+        char_effect[_charID].push(_itemID);
     }
 
     // can call only fight contract!s
