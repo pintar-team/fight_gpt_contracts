@@ -63,12 +63,13 @@ contract Effect {
             "sender is not char owner"
         );
 
-        item_token.transferFrom(address(this), msg.sender, _itemID);
+        address token_owner = items_owner[_itemID];
+        item_token.transferFrom(address(this), token_owner, _itemID);
         removeEffect(_charID, _itemID);
         delete items_owner[_itemID];
     }
 
-    // can call only miner!
+    //TODO: can call only miner!
     function batchMint(
         address _to,
         uint64[] memory _effects,
@@ -96,9 +97,27 @@ contract Effect {
 
     function getEffect(
         uint256 _tokenID
-    ) public view returns (uint8 _effects, uint64 _effectId) {
+    ) public view returns (uint64 _effectId, uint8 _effects) {
         _effects = effects[_tokenID].number_effects;
         _effectId = effects[_tokenID].effectsId;
+    }
+
+    function getCharEffects(uint256 _charID) public view returns (uint64[] memory, uint8[] memory) {
+        uint256[] storage effects_list = char_effect[_charID];
+        uint256 length = effects_list.length;
+        
+        uint64[] memory effects_ids = new uint64[](length);
+        uint8[] memory effects_nums = new uint8[](length);
+
+        for (uint32 i = 0; i < length; i++) {
+            uint256 item_id = effects_list[i];
+            EffectData memory effectData = effects[item_id];
+
+            effects_ids[i] = effectData.effectsId;
+            effects_nums[i] = effectData.number_effects;
+        }
+
+        return (effects_ids, effects_nums);
     }
 
     function removeEffect(uint256 _charID, uint256 _itemID) internal {
