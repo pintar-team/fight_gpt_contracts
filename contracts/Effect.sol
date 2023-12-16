@@ -2,21 +2,17 @@
 pragma solidity >=0.8.0 <0.9.0;
 
 import "@openzeppelin/contracts/utils/math/SafeCast.sol";
-import "@openzeppelin/contracts/access/AccessControl.sol";
 
 import "./Item.sol";
 import "./Char.sol";
 
-contract Effect is AccessControl {
+contract Effect {
     using SafeCast for uint256;
 
     struct EffectData {
         uint64 effectsId;
         uint8 number_effects;
     }
-
-    bytes32 public constant MINTER_ROLE = keccak256("MINTER_ROLE");
-    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
 
     HeroesGPT public char_token;
     Item public item_token;
@@ -44,7 +40,6 @@ contract Effect is AccessControl {
     constructor(address _item_contract, address _char_token) {
         item_token = Item(_item_contract);
         char_token = HeroesGPT(_char_token);
-        _grantRole(ADMIN_ROLE, msg.sender);
     }
 
     function takeThePill(
@@ -78,7 +73,7 @@ contract Effect is AccessControl {
         address _to,
         uint64[] memory _effects,
         uint8[] memory _number_effects
-    ) onlyRole(MINTER_ROLE) external {
+    ) external {
         require(
             _effects.length == _number_effects.length,
             "Invalid input params"
