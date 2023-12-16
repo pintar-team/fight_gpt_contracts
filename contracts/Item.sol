@@ -37,7 +37,6 @@ contract Item is
         return baseURI;
     }
 
-
     function safeMint(
         address to,
         uint256 tokenId,
@@ -46,6 +45,7 @@ contract Item is
         _safeMint(to, tokenId);
         _setTokenURI(tokenId, uri);
         _setRoyaltyPercentage(tokenId, percentageBasisPoints);
+        _setReceiver(tokenId, to);
     }
 
     function _setBaseURI(string memory _newBaseURI)

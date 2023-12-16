@@ -27,7 +27,10 @@ describe("Item contract", function () {
 
         it("Should set the right minter", async function () {
             const role = await item.MINTER_ROLE();
-            expect(await item.hasRole(role, owner.address)).to.equal(true);
+
+            await item.grantRole(role, addr2.address);
+
+            expect(await item.hasRole(role, addr2.address)).to.equal(true);
             expect(await item.hasRole(role, addr1.address)).to.equal(false);
         });
 
@@ -55,80 +58,55 @@ describe("Item contract", function () {
         it("try mint a token", async function () {
             const tokenId = 1;
             const tokenURI = "http://example.com/token1";
-            const effectID = 333;
-            const effects = 254;
+            const role = await item.MINTER_ROLE();
 
-            await item.safeMint(addr1.address, tokenId, tokenURI, effectID, effects);
+            await item.grantRole(role, owner);
+            await item.safeMint(addr1.address, tokenId, tokenURI);
             expect(await item.ownerOf(tokenId)).to.equal(addr1.address);
             expect(await item.tokenURI(tokenId)).to.equal(tokenURI);
-            expect(await item.getEffectsID(tokenId)).to.equal(effectID);
-            expect(await item.getNumbersOfEffects(tokenId)).to.equal(effects);
-        });
-
-        it("try Batch Minting tokens", async function () {
-            const effects = [123, 456, 789];
-            const number_effects = [10, 1, 2];
-            const numberOfTokens = effects.length;
-
-            await item.batchMint(addr2.address, effects, number_effects);
-
-            const totalSupply = await item.totalSupply();
-
-            expect(numberOfTokens).to.equal(totalSupply);
-            expect(await item.getEffectsID(1)).to.equal(123);
-            expect(await item.getEffectsID(2)).to.equal(456);
-            expect(await item.getEffectsID(3)).to.equal(789);
-
-            expect(await item.getNumbersOfEffects(1)).to.equal(10);
-            expect(await item.getNumbersOfEffects(2)).to.equal(1);
-            expect(await item.getNumbersOfEffects(3)).to.equal(2);
         });
 
         it("try mint a token and check royaltyInfo", async function () {
             const tokenId = 1;
             const tokenURI = "1";
-            const effectID = 333;
-            const effects_number = 1;
             const to = addrs[0];
+            const role = await item.MINTER_ROLE();
 
-            await item.safeMint(to, tokenId, tokenURI, effectID, effects_number);
+            await item.grantRole(role, owner);
+            await item.safeMint(to, tokenId, tokenURI);
 
-            const [owner, rewards] = await item.royaltyInfo(1, 5000);
+            const [tokenOwner, rewards] = await item.royaltyInfo(tokenId, 5000);
 
-            expect(owner).to.equal(to.address);
+            expect(tokenOwner).to.equal(to.address);
             expect(rewards).to.equal(250n);
         });
 
         it("try mint a token and burn it", async function () {
             const tokenId = 1;
             const tokenURI = "1";
-            const effectID = 333;
-            const effects_number = 22;
+            const role = await item.MINTER_ROLE();
 
-            await item.safeMint(owner, tokenId, tokenURI, effectID, effects_number);
+            await item.grantRole(role, owner);
+            await item.safeMint(owner, tokenId, tokenURI);
             const totalSupply = await item.totalSupply();
 
             expect(totalSupply).to.equal(tokenId);
-            expect(await item.getEffectsID(tokenId)).to.equal(effectID);
-            expect(await item.getNumbersOfEffects(1)).to.equal(effects_number);
 
             await item.burn(tokenId);
 
             const new_totalSupply = await item.totalSupply();
 
             expect(new_totalSupply).to.equal(0n);
-            expect(await item.getEffectsID(tokenId)).to.equal(0n);
-            expect(await item.getNumbersOfEffects(tokenId)).to.equal(0n);
         });
 
         it("test approve for burn", async function () {
             const tokenId = 1;
             const tokenURI = "1";
-            const effectID = 333;
-            const effects_number = 22;
             const to = addrs[0];
+            const role = await item.MINTER_ROLE();
 
-            await item.safeMint(to, tokenId, tokenURI, effectID, effects_number);
+            await item.grantRole(role, owner);
+            await item.safeMint(to, tokenId, tokenURI);
             await item.connect(to).approve(addr2, tokenId);
             await item.connect(addr2).burn(tokenId);
         });

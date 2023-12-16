@@ -110,7 +110,7 @@ contract Effect is AccessControl {
         uint256[] storage effects_list = char_effect[_charID];
         uint256 length = effects_list.length;
 
-        for (uint256 i = 0; i < length; i++) {
+        for (uint32 i = 0; i < length; i++) {
             if (effects_list[i] == _itemID) {
                 effects_list[i] = effects_list[length - 1];
                 effects_list.pop();
