@@ -44,6 +44,7 @@ contract HeroesGPT is
         _safeMint(to, tokenId);
         _setTokenURI(tokenId, uri);
         _setRoyaltyPercentage(tokenId, percentageBasisPoints);
+        _setReceiver(tokenId, to);
     }
 
     function _setBaseURI(string memory _newBaseURI)
