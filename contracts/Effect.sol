@@ -42,10 +42,10 @@ contract Effect {
         char_token = HeroesGPT(_char_token);
     }
 
-    function takeThePill(
-        uint256 _charID,
-        uint256 _itemID
-    ) external onlyNotContract {
+    function takeThePill(uint256 _charID, uint256 _itemID)
+        external
+        onlyNotContract
+    {
         require(
             char_token.ownerOf(_charID) == msg.sender,
             "sender is not char owner"
@@ -56,7 +56,10 @@ contract Effect {
         char_effect[_charID].push(_itemID);
     }
 
-    function getBackItem(uint256 _itemID, uint256 _charID) external onlyNotContract {
+    function getBackItem(uint256 _itemID, uint256 _charID)
+        external
+        onlyNotContract
+    {
         require(items_owner[_itemID] == msg.sender, "Sender is not owner");
         require(
             char_token.ownerOf(_charID) == msg.sender,
@@ -95,17 +98,23 @@ contract Effect {
         }
     }
 
-    function getEffect(
-        uint256 _tokenID
-    ) public view returns (uint64 _effectId, uint8 _effects) {
+    function getEffect(uint256 _tokenID)
+        public
+        view
+        returns (uint64 _effectId, uint8 _effects)
+    {
         _effects = effects[_tokenID].number_effects;
         _effectId = effects[_tokenID].effectsId;
     }
 
-    function getCharEffects(uint256 _charID) public view returns (uint64[] memory, uint8[] memory) {
+    function getCharEffects(uint256 _charID)
+        public
+        view
+        returns (uint64[] memory, uint8[] memory)
+    {
         uint256[] storage effects_list = char_effect[_charID];
         uint256 length = effects_list.length;
-        
+
         uint64[] memory effects_ids = new uint64[](length);
         uint8[] memory effects_nums = new uint8[](length);
 
