@@ -84,17 +84,39 @@ describe("Item contract", function () {
             await effect.connect(player2).takeThePill(2, 2);
             await effect.connect(player3).takeThePill(3, 3);
 
-            const [token1EffectID, token1NumberOfEffects] = await effect.getCharEffects(1);
+            let [token1EffectID, token1NumberOfEffects] = await effect.getCharEffects(1);
             expect(token1EffectID[0]).to.equal(10n);
             expect(token1NumberOfEffects[0]).to.equal(30n);
 
-            const [token2EffectID, token2NumberOfEffects] = await effect.getCharEffects(2);
+            let [token2EffectID, token2NumberOfEffects] = await effect.getCharEffects(2);
             expect(token2EffectID[0]).to.equal(11n);
             expect(token2NumberOfEffects[0]).to.equal(40n);
 
-            const [token3EffectID, token3NumberOfEffects] = await effect.getCharEffects(3);
+            let [token3EffectID, token3NumberOfEffects] = await effect.getCharEffects(3);
             expect(token3EffectID[0]).to.equal(2n);
             expect(token3NumberOfEffects[0]).to.equal(33n);
+
+            /// TODO: Tesing Increase, Decrease!
+
+            await expect(effect.connect(player2).getBackItem(1, 1)).to.be.reverted;
+            await expect(effect.connect(player3).getBackItem(2, 2)).to.be.reverted;
+            await expect(effect.connect(player1).getBackItem(3, 3)).to.be.reverted;
+
+            await effect.connect(player1).getBackItem(1, 1);
+            await effect.connect(player2).getBackItem(2, 2);
+            await effect.connect(player3).getBackItem(3, 3);
+
+            [token1EffectID, token1NumberOfEffects] = await effect.getCharEffects(1);
+            expect(token1EffectID.length).to.equal(0);
+            expect(token1NumberOfEffects.length).to.equal(0);
+
+            [token2EffectID, token2NumberOfEffects] = await effect.getCharEffects(2);
+            expect(token2EffectID.length).to.equal(0);
+            expect(token2NumberOfEffects.length).to.equal(0);
+
+            [token3EffectID, token3NumberOfEffects] = await effect.getCharEffects(3);
+            expect(token3EffectID.length).to.equal(0);
+            expect(token3NumberOfEffects.length).to.equal(0);
         });
     });
 });
