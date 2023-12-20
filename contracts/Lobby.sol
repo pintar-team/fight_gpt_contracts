@@ -24,6 +24,11 @@ contract Lobby {
     // owner >> stake_amount
     mapping(address => uint256) public stake_amount;
 
+    modifier onlyUnpaused() {
+        require(!pause, "contract on pause");
+        _;
+    }
+
     modifier onlyNotContract() {
         uint32 size;
         address _addr = msg.sender;
@@ -50,9 +55,9 @@ contract Lobby {
         // TODO: emit event.
     }
 
-    function add(uint256 _charID, uint256 _stake_amount) external {
-        require(!pause, "contract on pause");
+    function join(uint256 _charID, uint256 _stake_amount) external onlyUnpaused {
         require(_stake_amount >= min_stake, "invalid stake amount");
+        require(char_owners[msg.sender] == 0, "one of char already joined");
 
         contract_char_token.transferFrom(msg.sender, address(this), _charID);
     }
