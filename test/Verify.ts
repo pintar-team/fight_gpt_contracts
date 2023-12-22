@@ -19,26 +19,24 @@ describe("VerifySignature contract", function () {
             const signer = accounts[0];
             const to = accounts[1].address;
             const message = "Hello gpt";
-            const amount = 999;
-            const nonce = 1;
     
-            const hash = await verifySignature.getMessageHash(to, amount, message, nonce);
+            const hash = await verifySignature.getMessageHash(to, message);
             const sig = await signer.signMessage(ethers.toBeArray(hash));
             const ethHash = await verifySignature.getEthSignedMessageHash(hash);
     
             // console.log("signer          ", signer.address);
             // console.log("recovered signer", await verifySignature.recoverSigner(ethHash, sig));
-    
+
             expect(
                 await verifySignature.recoverSigner(ethHash, sig)
             ).to.equal(signer.address);
 
             expect(
-                await verifySignature.verify(signer.address, to, amount, message, nonce, sig)
+                await verifySignature.verify(signer.address, to, message, sig)
               ).to.equal(true);
 
               expect(
-                await verifySignature.verify(signer.address, to, amount + 1, message, nonce, sig)
+                await verifySignature.verify(signer.address, to, message + 'wrong', sig)
               ).to.equal(false);
         });
     });
