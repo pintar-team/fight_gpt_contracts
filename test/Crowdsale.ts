@@ -33,6 +33,9 @@ describe("CrowdSale contract", function () {
             const sig = await serverSign.signMessage(ethers.toBeArray(hash));
 
             await crowdsale.connect(to).buy(newURL, sig);
+
+            expect(await heroesGPT.ownerOf(1)).to.equal(to.address);
+            expect(await heroesGPT.tokenURI(1)).to.equal(newURL);
         });
     });
 });
