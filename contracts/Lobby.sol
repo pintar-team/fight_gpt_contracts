@@ -18,7 +18,7 @@ contract Lobby {
     ERC20Token public contract_token;
 
     // queue for char, wait for fight
-    uint256[20] public queue;
+    uint256[10] public queue;
     // owner >> char_id
     mapping(address => uint256) public char_owners;
     // owner >> stake_amount
