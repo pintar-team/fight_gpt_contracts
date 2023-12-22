@@ -3,7 +3,7 @@ import { ethers } from "hardhat";
 import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 
-describe("Item contract", function () {
+describe("Effect contract", function () {
     let Item: any;
     let item: any;
     let Effect: any;
@@ -28,7 +28,7 @@ describe("Item contract", function () {
         effect = await Effect.deploy(item.target, heroesGPT.target);
     });
 
-    describe("Effect: test batchMint", function () {
+    describe("test batchMint", function () {
         it("test batchMint", async function () {
             const itemMintRole = await item.MINTER_ROLE();
 

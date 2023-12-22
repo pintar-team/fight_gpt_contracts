@@ -18,7 +18,7 @@ describe("Item contract", function () {
         item = await Item.deploy();
     });
 
-    describe("Deployment", function () {
+    describe("test roles", function () {
         it("Should set the right admin", async function () {
             const role = await item.DEFAULT_ADMIN_ROLE();
             expect(await item.hasRole(role, owner.address)).to.equal(true);
