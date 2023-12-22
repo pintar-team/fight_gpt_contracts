@@ -30,12 +30,17 @@ describe("CrowdSale contract", function () {
             const newURL = "test_url";
             const to = accounts[2];
             const hash = ethers.keccak256(ethers.solidityPacked(['address', 'string'], [to.address, newURL]));
-            const sig = await serverSign.signMessage(ethers.toBeArray(hash));
+            let sig = await serverSign.signMessage(ethers.toBeArray(hash));
 
             await crowdsale.connect(to).buy(newURL, sig);
 
             expect(await heroesGPT.ownerOf(1)).to.equal(to.address);
             expect(await heroesGPT.tokenURI(1)).to.equal(newURL);
+
+            // invalid sig
+            sig = await accounts[8].signMessage(ethers.toBeArray(hash));
+
+            await expect(crowdsale.connect(to).buy(newURL, sig)).to.be.reverted;
         });
     });
 });
