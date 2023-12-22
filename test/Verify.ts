@@ -23,11 +23,11 @@ describe("VerifySignature contract", function () {
             const nonce = 1;
     
             const hash = await verifySignature.getMessageHash(to, amount, message, nonce);
-            const sig = await signer.signMessage(hash);
+            const sig = await signer.signMessage(ethers.toBeArray(hash));
             const ethHash = await verifySignature.getEthSignedMessageHash(hash);
     
-            console.log("signer          ", signer.address);
-            console.log("recovered signer", await verifySignature.recoverSigner(ethHash, sig));
+            // console.log("signer          ", signer.address);
+            // console.log("recovered signer", await verifySignature.recoverSigner(ethHash, sig));
     
             expect(
                 await verifySignature.verify(signer.address, to, amount, message, nonce, sig)
