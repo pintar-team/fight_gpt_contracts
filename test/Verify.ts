@@ -30,12 +30,16 @@ describe("VerifySignature contract", function () {
             // console.log("recovered signer", await verifySignature.recoverSigner(ethHash, sig));
     
             expect(
+                await verifySignature.recoverSigner(ethHash, sig)
+            ).to.equal(signer.address);
+
+            expect(
                 await verifySignature.verify(signer.address, to, amount, message, nonce, sig)
-              ).to.equal(true)
+              ).to.equal(true);
 
               expect(
                 await verifySignature.verify(signer.address, to, amount + 1, message, nonce, sig)
-              ).to.equal(false)
+              ).to.equal(false);
         });
     });
 });
