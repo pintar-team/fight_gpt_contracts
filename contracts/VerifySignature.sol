@@ -1,12 +1,15 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0 <0.9.0;
 
+
 contract VerifySignature {
     function getMessageHash(
         address _to,
-        string memory _message
+        uint _amount,
+        string memory _message,
+        uint _nonce
     ) public pure returns (bytes32) {
-        return keccak256(abi.encodePacked(_to, _message));
+        return keccak256(abi.encodePacked(_to, _amount, _message, _nonce));
     }
 
     function getEthSignedMessageHash(bytes32 _messageHash)
@@ -16,17 +19,19 @@ contract VerifySignature {
     {
         return
             keccak256(
-                abi.encodePacked("\x19FightGPT Signed Message:\n32", _messageHash)
+                abi.encodePacked("\x19Ethereum Signed Message:\n32", _messageHash)
             );
     }
 
     function verify(
         address _signer,
         address _to,
+        uint _amount,
         string memory _message,
+        uint _nonce,
         bytes memory signature
     ) public pure returns (bool) {
-        bytes32 messageHash = getMessageHash(_to, _message);
+        bytes32 messageHash = getMessageHash(_to, _amount, _message, _nonce);
         bytes32 ethSignedMessageHash = getEthSignedMessageHash(messageHash);
 
         return recoverSigner(ethSignedMessageHash, signature) == _signer;

@@ -15,23 +15,27 @@ describe("VerifySignature contract", function () {
     });
 
     describe("Check signature", async function() {
-        const signer = accounts[0];
-        const to = accounts[1].address;
-        const message = "Hello gpt";
+        it("sign message and check sig", async function () {
+            const signer = accounts[0];
+            const to = accounts[1].address;
+            const message = "Hello gpt";
+            const amount = 999;
+            const nonce = 1;
+    
+            const hash = await verifySignature.getMessageHash(to, amount, message, nonce);
+            const sig = await signer.signMessage(hash);
+            const ethHash = await verifySignature.getEthSignedMessageHash(hash);
+    
+            console.log("signer          ", signer.address);
+            console.log("recovered signer", await verifySignature.recoverSigner(ethHash, sig));
+    
+            expect(
+                await verifySignature.verify(signer.address, to, amount, message, nonce, sig)
+              ).to.equal(true)
 
-        const hash = await verifySignature.getMessageHash(to, message);
-        const sig = await signer.signMessage(Buffer.from(hash, 'hex'));
-        const ethHash = await verifySignature.getEthSignedMessageHash(hash);
-
-        console.log("signer          ", signer.address);
-        console.log("recovered signer", await verifySignature.recoverSigner(ethHash, sig));
-
-        expect(
-            await verifySignature.verify(signer.address, to, message, sig)
-        ).to.equal(true);
-
-        expect(
-            await verifySignature.verify(signer.address, to, message + 'worng', sig)
-        ).to.equal(false);
+              expect(
+                await verifySignature.verify(signer.address, to, amount + 1, message, nonce, sig)
+              ).to.equal(false)
+        });
     });
 });
