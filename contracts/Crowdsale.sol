@@ -10,6 +10,7 @@ contract CrowdSale {
     using SafeCast for uint256;
 
     VerifySignature public immutable ec = new VerifySignature();
+    HeroesGPT public char_contract;
 
     address public server_address;
 
@@ -24,11 +25,17 @@ contract CrowdSale {
         _;
     }
 
-    constructor(address _server) {
+    constructor(address _server, address _char) {
         server_address = _server;
+        char_contract = HeroesGPT(_char);
     }
 
-    function buy() external onlyNotContract {
-        
+    function buy(string memory _uri, bytes memory _signature) external onlyNotContract {
+        bool verify = ec.verify(server_address, msg.sender, _uri, _signature);
+        require(verify, "invalid signautre");
+
+        uint256 newTokenId = char_contract.totalSupply() + 1;
+
+        char_contract.safeMint(msg.sender, newTokenId, _uri);
     }
 }
