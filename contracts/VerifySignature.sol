@@ -1,12 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity >=0.8.0 <0.9.0;
 
-
 contract VerifySignature {
-    function getMessageHash(
-        address _to,
-        string memory _message
-    ) public pure returns (bytes32) {
+    function getMessageHash(address _to, string memory _message)
+        public
+        pure
+        returns (bytes32)
+    {
         return keccak256(abi.encodePacked(_to, _message));
     }
 
@@ -17,7 +17,10 @@ contract VerifySignature {
     {
         return
             keccak256(
-                abi.encodePacked("\x19Ethereum Signed Message:\n32", _messageHash)
+                abi.encodePacked(
+                    "\x19Ethereum Signed Message:\n32",
+                    _messageHash
+                )
             );
     }
 
@@ -33,11 +36,10 @@ contract VerifySignature {
         return recoverSigner(ethSignedMessageHash, signature) == _signer;
     }
 
-    function recoverSigner(bytes32 _ethSignedMessageHash, bytes memory _signature)
-        public
-        pure
-        returns (address)
-    {
+    function recoverSigner(
+        bytes32 _ethSignedMessageHash,
+        bytes memory _signature
+    ) public pure returns (address) {
         (bytes32 r, bytes32 s, uint8 v) = splitSignature(_signature);
 
         return ecrecover(_ethSignedMessageHash, v, r, s);
