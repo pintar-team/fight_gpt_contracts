@@ -17,6 +17,7 @@ contract Effect {
     HeroesGPT public char_token;
     Item public item_token;
 
+    uint64 public max_effects = 10;
     // item >> effects
     mapping(uint256 => EffectData) public effects;
     // charID >> itemIDs
@@ -50,6 +51,7 @@ contract Effect {
             char_token.ownerOf(_charID) == msg.sender,
             "sender is not char owner"
         );
+        require(char_effect[_charID].length <= max_effects, "Char Effects are limited");
 
         item_token.transferFrom(msg.sender, address(this), _itemID);
         items_owner[_itemID] = msg.sender;
