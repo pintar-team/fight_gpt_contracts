@@ -55,6 +55,10 @@ contract Effect {
         minter = _new_minter;
     }
 
+    function setlimit(uint64 _new_max_effects) external onlyOwner {
+        max_effects = _new_max_effects;
+    }
+
     function takeThePill(uint256 _charID, uint256 _itemID)
         external
         onlyNotContract
