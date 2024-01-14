@@ -33,6 +33,7 @@ describe("Effect contract", function () {
             const itemMintRole = await item.MINTER_ROLE();
 
             await item.grantRole(itemMintRole, effect.target);
+            await effect.setMinter(owner);
 
             const to = addr2;
             const effects = [44, 66, 77];
@@ -59,6 +60,7 @@ describe("Effect contract", function () {
 
             await item.grantRole(itemMintRole, effect.target);
             await heroesGPT.grantRole(charMintRole, owner);
+            await effect.setMinter(owner);
 
             const player1 = addrs[0];
             const player2 = addrs[1];

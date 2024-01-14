@@ -17,6 +17,8 @@ contract Effect {
     HeroesGPT public char_token;
     Item public item_token;
 
+    address public immutable owner;
+    address public minter;
     uint64 public max_effects = 10;
     // item >> effects
     mapping(uint256 => EffectData) public effects;
@@ -38,9 +40,19 @@ contract Effect {
         _;
     }
 
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Not the owner");
+        _;
+    }
+
     constructor(address _item_contract, address _char_token) {
         item_token = Item(_item_contract);
         char_token = HeroesGPT(_char_token);
+        owner = msg.sender;
+    }
+
+    function setMinter(address _new_minter) external onlyOwner {
+        minter = _new_minter;
     }
 
     function takeThePill(uint256 _charID, uint256 _itemID)
@@ -74,12 +86,12 @@ contract Effect {
         delete items_owner[_itemID];
     }
 
-    //TODO: can call only miner!
     function batchMint(
         address _to,
         uint64[] memory _effects,
         uint8[] memory _number_effects
     ) external {
+        require(msg.sender == minter, "sender should be minter!");
         require(
             _effects.length == _number_effects.length,
             "Invalid input params"
