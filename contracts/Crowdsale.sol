@@ -12,6 +12,10 @@ contract CrowdSale {
     VerifySignature public immutable ec = new VerifySignature();
     HeroesGPT public char_contract;
 
+    // TODO: add owner methods
+    // TODO: add price for buy token!
+    // TODO: add possible to buy via DEX.
+
     address public server_address;
 
     modifier onlyNotContract() {
