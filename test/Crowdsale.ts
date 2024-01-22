@@ -19,20 +19,22 @@ describe("CrowdSale contract", function () {
         heroesGPT = await HeroesGPT.deploy();
 
         accounts = await ethers.getSigners();
-        crowdsale = await Crowdsale.deploy(serverSign.address, heroesGPT.target);
+        crowdsale = await Crowdsale.deploy(serverSign.address, heroesGPT.target, accounts[5]);
 
         const role = await heroesGPT.MINTER_ROLE();
         await heroesGPT.grantRole(role, crowdsale.target);
     });
 
-    describe("try buy token", async function() {
+    describe("try buy native token", async function() {
         it("sign sig and try buy", async function () {
             const newURL = "test_url";
             const to = accounts[2];
             const hash = ethers.keccak256(ethers.solidityPacked(['address', 'string'], [to.address, newURL]));
             let sig = await serverSign.signMessage(ethers.toBeArray(hash));
 
-            await crowdsale.connect(to).buy(newURL, sig);
+            await crowdsale.connect(to).buyNative(newURL, sig, { 
+                value: ethers.parseEther('1.0')
+            });
 
             expect(await heroesGPT.ownerOf(1)).to.equal(to.address);
             expect(await heroesGPT.tokenURI(1)).to.equal(newURL);
@@ -40,7 +42,12 @@ describe("CrowdSale contract", function () {
             // invalid sig
             sig = await accounts[8].signMessage(ethers.toBeArray(hash));
 
-            await expect(crowdsale.connect(to).buy(newURL, sig)).to.be.reverted;
+            await expect(crowdsale.connect(to).buyNative(newURL, sig, { 
+                value: ethers.parseEther('0.1')
+            })).to.be.reverted;
+            await expect(crowdsale.connect(to).buyNative(newURL, sig, { 
+                value: ethers.parseEther('1.0')
+            })).to.be.reverted;
         });
     });
 });
