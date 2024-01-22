@@ -39,6 +39,8 @@ describe("CrowdSale contract", function () {
             expect(await heroesGPT.ownerOf(1)).to.equal(to.address);
             expect(await heroesGPT.tokenURI(1)).to.equal(newURL);
 
+            expect(await accounts[5].provider.getBalance(accounts[5])).to.equal(10001000000000000000000n);
+
             // invalid sig
             sig = await accounts[8].signMessage(ethers.toBeArray(hash));
 

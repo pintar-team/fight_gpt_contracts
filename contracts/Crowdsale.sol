@@ -65,6 +65,8 @@ contract CrowdSale {
             payable(msg.sender).transfer(change);
         }
 
+        payable(wallet).transfer(price);
+
         uint256 newTokenId = char_contract.totalSupply() + 1;
 
         char_contract.safeMint(msg.sender, newTokenId, _uri);
