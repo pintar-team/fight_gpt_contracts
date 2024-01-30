@@ -21,9 +21,8 @@ contract Fight {
     VerifySignature public immutable ec = new VerifySignature();
 
     bool public pause = false;
-    uint256 public min_stake = 100;
     uint256 public total_fights = 0;
-    uint8 public fee = 1; // 1%
+    uint8 public fee;
     address public server_address;
     address public wallet;
 
@@ -65,6 +64,22 @@ contract Fight {
         }
         require(size == 0, "sender is contract");
         _;
+    }
+
+    constructor(
+        address _wallet,
+        address _server,
+        uint8 _fee,
+        address _effects,
+        address _char,
+        address _token
+    ) {
+        wallet = _wallet;
+        server_address = _server;
+        fee = _fee;
+        contract_effects = Effect(_effects);
+        contract_char_token = HeroesGPT(_char);
+        contract_token = ERC20Token(_token);
     }
 
     function join(
