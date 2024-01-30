@@ -23,6 +23,9 @@ contract Fight {
     bool public pause = false;
     uint256 public min_stake = 100;
     uint256 public total_fights = 0;
+    uint8 public fee = 1; // 1%
+    address public server_address;
+    address public wallet;
 
     Effect public contract_effects;
     HeroesGPT public contract_char_token;
@@ -39,6 +42,10 @@ contract Fight {
         uint256 token1,
         uint256 stake0,
         uint256 stake1
+    );
+
+    event FightFinished(
+        
     );
 
     modifier onlyUnpaused() {
@@ -93,5 +100,80 @@ contract Fight {
         }
     }
 
-    function commmit(uint256 _id) external onlyUnpaused onlyNotContract {}
+    function commmit(uint256 _fight_id, uint256 _token_won, bytes memory _signature) external onlyUnpaused onlyNotContract {
+        Lobby memory lobby = fights[_fight_id];
+        string memory payload = concatenate(
+            _fight_id,
+            lobby.token0,
+            lobby.token1,
+            lobby.stake0,
+            lobby.stake1,
+            _token_won
+        );
+        bool verify = ec.verify(server_address, msg.sender, payload, _signature);
+
+        require(verify, "invalid signautre");
+        require(_token_won == lobby.token0 || _token_won == lobby.token1, "invalid won token id");
+
+        (uint256 winnerGain, uint256 loserReturn, uint256 platformFee) = calculateAmount(lobby.stake0, lobby.stake1);
+
+        address owner0 = token_owners[lobby.token0];
+        address owner1 = token_owners[lobby.token1];
+
+        if (_token_won == lobby.token0) {
+            contract_token.transfer(owner0, winnerGain);
+            contract_token.transfer(owner1, loserReturn);
+        } else if (_token_won == lobby.token1) {
+            contract_token.transfer(owner1, winnerGain);
+            contract_token.transfer(owner0, loserReturn);
+        } else {
+            revert("Invalid sig or payload");
+        }
+
+        contract_token.transfer(wallet, platformFee);
+
+        delete token_owners[lobby.token1];
+        delete token_owners[lobby.token0];
+
+        /// TODO: make mint items
+    }
+
+    function calculateAmount(uint256 stakeAmount0, uint256 stakeAmount1) public view returns (uint256 winnerGain, uint256 loserReturn, uint256 platformFee) {
+        uint256 potentialGain = min(stakeAmount0, stakeAmount1);
+        platformFee = (potentialGain * fee) / 100;
+        winnerGain = potentialGain - platformFee;
+        loserReturn = max(stakeAmount1, stakeAmount0) - potentialGain;
+
+        return (winnerGain, loserReturn, platformFee);
+    }
+
+    function concatenate(
+        uint256 fight_id,
+        uint256 token0,
+        uint256 token1,
+        uint256 stake0,
+        uint256 stake1,
+        uint256 token_won
+    ) public pure returns (string memory) {
+        return string(abi.encodePacked(
+            uintToString(fight_id), 
+            uintToString(token0), 
+            uintToString(token1), 
+            uintToString(stake0),
+            uintToString(stake1),
+            uintToString(token_won)
+        ));
+    }
+
+    function min(uint256 a, uint256 b) private pure returns (uint256) {
+        return a < b ? a : b;
+    }
+
+    function max(uint256 a, uint256 b) private pure returns (uint256) {
+        return a > b ? a : b;
+    }
+
+    function uintToString(uint256 value) internal pure returns (string memory) {
+        return Strings.toString(value);
+    }
 }
