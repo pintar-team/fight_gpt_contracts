@@ -50,6 +50,24 @@ describe("CrowdSale contract", function () {
     });
 
     describe("Fight contract testing", async function() {
+        it("testing constructor", async function () {
+          let contractFee = await fight.fee();
+          let contractWallet = await fight.wallet();
+          let contractServer = await fight.server_address();
+          let totalFights = await fight.total_fights();
+          let contractEffects = await fight.contract_effects();
+          let contractChar = await fight.contract_char_token();
+          let contractToken = await fight.contract_token();
+
+          expect(Number(contractFee)).to.equal(fee);
+          expect(Number(totalFights)).to.equal(0);
+          expect(String(contractWallet)).to.equal(wallet.address);
+          expect(String(contractServer)).to.equal(serverSign.address);
+          expect(String(contractEffects)).to.equal(effect.target);
+          expect(String(contractChar)).to.equal(heroesGPT.target);
+          expect(String(contractToken)).to.equal(token.target);
+        });
+
         it("test fight 2 tokens", async function () {
           let user0 = accounts[3];
           let user1 = accounts[4];
