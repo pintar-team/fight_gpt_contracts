@@ -34,7 +34,11 @@ contract CrowdSale {
         _;
     }
 
-    constructor(address _server, address _char, address _wallet) {
+    constructor(
+        address _server,
+        address _char,
+        address _wallet
+    ) {
         server_address = _server;
         char_contract = HeroesGPT(_char);
         owner = msg.sender;
@@ -53,7 +57,11 @@ contract CrowdSale {
         dex_address = _dex;
     }
 
-    function buyNative(string memory _uri, bytes memory _signature) external payable onlyNotContract {
+    function buyNative(string memory _uri, bytes memory _signature)
+        external
+        payable
+        onlyNotContract
+    {
         require(msg.value >= price, "Sent value is less than the price");
 
         bool verify = ec.verify(server_address, msg.sender, _uri, _signature);
