@@ -45,7 +45,10 @@ contract Fight {
     );
 
     event FightFinished(
-        
+        uint256 fightID,
+        uint256 winnerID,
+        address winnerAddress,
+        uint256 amount
     );
 
     modifier onlyUnpaused() {
@@ -123,9 +126,13 @@ contract Fight {
         if (_token_won == lobby.token0) {
             contract_token.transfer(owner0, winnerGain);
             contract_token.transfer(owner1, loserReturn);
+
+            emit FightFinished(_fight_id, _token_won, owner0, winnerGain);
         } else if (_token_won == lobby.token1) {
             contract_token.transfer(owner1, winnerGain);
             contract_token.transfer(owner0, loserReturn);
+
+            emit FightFinished(_fight_id, _token_won, owner1, winnerGain);
         } else {
             revert("Invalid sig or payload");
         }
