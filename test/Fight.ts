@@ -68,6 +68,16 @@ describe("CrowdSale contract", function () {
           expect(String(contractToken)).to.equal(token.target);
         });
 
+        it("testing calc commision", async function () {
+          let amount0 = 100n;
+          let amount1 = 3000n;
+          let [winnerGain, loserReturn, platformFee] = await fight.calculateAmount(amount0, amount1);
+
+          expect(platformFee).to.equal((amount0 * 2n) / 100n * BigInt(fee));
+          expect(winnerGain).to.equal(amount0 * 2n - (amount0 * 2n) / 100n * BigInt(fee));
+          expect(loserReturn).to.equal(amount1 - amount0);
+        });
+
         it("test fight 2 tokens", async function () {
           let user0 = accounts[3];
           let user1 = accounts[4];

@@ -161,10 +161,11 @@ contract Fight {
     }
 
     function calculateAmount(uint256 stakeAmount0, uint256 stakeAmount1) public view returns (uint256 winnerGain, uint256 loserReturn, uint256 platformFee) {
-        uint256 potentialGain = min(stakeAmount0, stakeAmount1);
+        uint256 minAmount = min(stakeAmount0, stakeAmount1);
+        uint256 potentialGain = minAmount * 2;
         platformFee = (potentialGain * fee) / 100;
         winnerGain = potentialGain - platformFee;
-        loserReturn = max(stakeAmount1, stakeAmount0) - potentialGain;
+        loserReturn = max(stakeAmount1, stakeAmount0) - minAmount;
 
         return (winnerGain, loserReturn, platformFee);
     }
