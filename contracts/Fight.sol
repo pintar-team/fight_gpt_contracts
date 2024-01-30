@@ -30,6 +30,7 @@ contract Fight {
 
     Lobby public waiting;
     mapping(uint256 => Lobby) public fights;
+    mapping(uint256 => address) public token_owners;
 
     event ReadyToFight(uint256 id, uint256 stake);
 
@@ -59,14 +60,17 @@ contract Fight {
     function join(
         uint256 _charID,
         uint256 _stake_amount
-    ) external onlyUnpaused {
+    ) external onlyUnpaused onlyNotContract {
         require(_stake_amount > 0, "Stake should be more then zero");
+
+        address token_owner = contract_char_token.ownerOf(_charID);
 
         contract_char_token.transferFrom(msg.sender, address(this), _charID);
         contract_token.transferFrom(msg.sender, address(this), _stake_amount);
 
         if (waiting.token0 == 0 && waiting.token1 == 0) {
             waiting = Lobby(_charID, 0, _stake_amount, 0);
+            token_owners[_charID] = token_owner;
             emit ReadyToFight(_charID, _stake_amount);
         } else {
             Lobby memory waited = waiting;
@@ -77,6 +81,7 @@ contract Fight {
             total_fights += 1;
 
             fights[total_fights] = waited;
+            token_owners[_charID] = token_owner;
             waiting = Lobby(0, 0, 0, 0);
 
             emit FightStarted(
@@ -87,4 +92,6 @@ contract Fight {
             );
         }
     }
+
+    function commmit(uint256 _id) external onlyUnpaused onlyNotContract {}
 }
