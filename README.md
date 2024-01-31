@@ -18,5 +18,5 @@ npx hardhat run scripts/deploy.ts --network testnet
 ```
 
 ### Contracts
-  * `HeroesGPT`:`0x6e617771f882F0Af8ACC9A80017C77bB8fb7cEC1`
-  * `CrowdSale`: `0xb1E365E836A25AA5Ba4220A3019Cf051C23B0199`
+  * `HeroesGPT`:`0xD67d3B191EDDE0B4fC6dF994E0DEf522cDF9275c`
+  * `CrowdSale`: `0xC8fd79fc01d492F103d1Bb228FD6012c80E6Aa50`

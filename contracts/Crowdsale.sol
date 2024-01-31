@@ -16,7 +16,7 @@ contract CrowdSale {
     address public immutable wallet;
     address public dex_address;
     address public server_address;
-    uint256 public price = 1 * 10**18;
+    uint256 public price = 10000;
 
     modifier onlyNotContract() {
         uint32 size;
