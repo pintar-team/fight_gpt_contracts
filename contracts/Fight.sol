@@ -32,7 +32,9 @@ contract Fight {
     ERC20Token public contract_token;
 
     Lobby public waiting;
+
     mapping(uint256 => Lobby) public fights;
+    mapping(uint256 => uint8) public rounds;
     mapping(uint256 => address) public token_owners;
 
     event ReadyToFight(uint256 id, uint256 stake);
@@ -83,12 +85,13 @@ contract Fight {
         contract_token = ERC20Token(_token);
     }
 
-    function join(uint256 _charID, uint256 _stake_amount)
-        external
-        onlyUnpaused
-        onlyNotContract
-    {
+    function join(
+        uint256 _charID,
+        uint256 _stake_amount,
+        uint8 _rounds
+    ) external onlyUnpaused onlyNotContract {
         require(_stake_amount > 0, "Stake should be more then zero");
+        require(_rounds <= max_rounds, "rounds is not valid");
 
         address token_owner = contract_char_token.ownerOf(_charID);
 
@@ -98,6 +101,7 @@ contract Fight {
         if (waiting.token0 == 0 && waiting.token1 == 0) {
             waiting = Lobby(_charID, 0, _stake_amount, 0);
             token_owners[_charID] = token_owner;
+
             emit ReadyToFight(_charID, _stake_amount);
         } else {
             Lobby memory waited = waiting;
