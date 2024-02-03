@@ -22,6 +22,7 @@ contract Fight {
 
     bool public pause = false;
     uint256 public total_fights = 0;
+    uint8 public max_rounds = 1;
     uint8 public fee;
     address public server_address;
     address public wallet;
@@ -82,10 +83,11 @@ contract Fight {
         contract_token = ERC20Token(_token);
     }
 
-    function join(
-        uint256 _charID,
-        uint256 _stake_amount
-    ) external onlyUnpaused onlyNotContract {
+    function join(uint256 _charID, uint256 _stake_amount)
+        external
+        onlyUnpaused
+        onlyNotContract
+    {
         require(_stake_amount > 0, "Stake should be more then zero");
 
         address token_owner = contract_char_token.ownerOf(_charID);
@@ -118,7 +120,11 @@ contract Fight {
         }
     }
 
-    function commmit(uint256 _fight_id, uint256 _token_won, bytes memory _signature) external onlyUnpaused onlyNotContract {
+    function commmit(
+        uint256 _fight_id,
+        uint256 _token_won,
+        bytes memory _signature
+    ) external onlyUnpaused onlyNotContract {
         Lobby memory lobby = fights[_fight_id];
         string memory payload = concatenate(
             _fight_id,
@@ -128,12 +134,24 @@ contract Fight {
             lobby.stake1,
             _token_won
         );
-        bool verify = ec.verify(server_address, msg.sender, payload, _signature);
+        bool verify = ec.verify(
+            server_address,
+            msg.sender,
+            payload,
+            _signature
+        );
 
         require(verify, "invalid signautre");
-        require(_token_won == lobby.token0 || _token_won == lobby.token1, "invalid won token id");
+        require(
+            _token_won == lobby.token0 || _token_won == lobby.token1,
+            "invalid won token id"
+        );
 
-        (uint256 winnerGain, uint256 loserReturn, uint256 platformFee) = calculateAmount(lobby.stake0, lobby.stake1);
+        (
+            uint256 winnerGain,
+            uint256 loserReturn,
+            uint256 platformFee
+        ) = calculateAmount(lobby.stake0, lobby.stake1);
 
         address owner0 = token_owners[lobby.token0];
         address owner1 = token_owners[lobby.token1];
@@ -160,7 +178,15 @@ contract Fight {
         /// TODO: make mint items
     }
 
-    function calculateAmount(uint256 stakeAmount0, uint256 stakeAmount1) public view returns (uint256 winnerGain, uint256 loserReturn, uint256 platformFee) {
+    function calculateAmount(uint256 stakeAmount0, uint256 stakeAmount1)
+        public
+        view
+        returns (
+            uint256 winnerGain,
+            uint256 loserReturn,
+            uint256 platformFee
+        )
+    {
         uint256 minAmount = min(stakeAmount0, stakeAmount1);
         uint256 potentialGain = minAmount * 2;
         platformFee = (potentialGain * fee) / 100;
@@ -178,14 +204,17 @@ contract Fight {
         uint256 stake1,
         uint256 token_won
     ) public pure returns (string memory) {
-        return string(abi.encodePacked(
-            uintToString(fight_id), 
-            uintToString(token0), 
-            uintToString(token1), 
-            uintToString(stake0),
-            uintToString(stake1),
-            uintToString(token_won)
-        ));
+        return
+            string(
+                abi.encodePacked(
+                    uintToString(fight_id),
+                    uintToString(token0),
+                    uintToString(token1),
+                    uintToString(stake0),
+                    uintToString(stake1),
+                    uintToString(token_won)
+                )
+            );
     }
 
     function min(uint256 a, uint256 b) private pure returns (uint256) {
