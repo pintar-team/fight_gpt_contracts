@@ -114,6 +114,7 @@ contract Fight {
             fights[total_fights] = waited;
             token_owners[_charID] = token_owner;
             waiting = Lobby(0, 0, 0, 0);
+            rounds[_charID] = _rounds;
 
             emit FightStarted(
                 waited.token0,
@@ -182,14 +183,22 @@ contract Fight {
         /// TODO: make mint items
     }
 
-    function calculateAmount(uint256 stakeAmount0, uint256 stakeAmount1)
+    function updateRounds(uint256 _token) internal {
+        if (rounds[_token] == 1) {
+            delete rounds[_token];
+            delete token_owners[_token];
+        } else {
+            --rounds[_token];
+        }
+    }
+
+    function calculateAmount(
+        uint256 stakeAmount0,
+        uint256 stakeAmount1
+    )
         public
         view
-        returns (
-            uint256 winnerGain,
-            uint256 loserReturn,
-            uint256 platformFee
-        )
+        returns (uint256 winnerGain, uint256 loserReturn, uint256 platformFee)
     {
         uint256 minAmount = min(stakeAmount0, stakeAmount1);
         uint256 potentialGain = minAmount * 2;
