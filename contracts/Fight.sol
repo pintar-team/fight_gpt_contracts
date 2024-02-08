@@ -15,9 +15,10 @@ contract Fight {
     HeroesGPT public contract_char_token;
     ERC20Token public contract_token;
 
-    uint256 public waiting;
     uint256 public total_fights = 0;
     uint8 public fee = 0;
+
+    uint256[10] public waiting;
 
     mapping(uint256 => uint256[2]) public fights;
     mapping(uint256 => uint8) public rounds;
@@ -44,13 +45,15 @@ contract Fight {
 
         stakes[loserid] -= potentialGain;
         stakes[winnerid] += winnerGain;
-        // TODO: send fee for commiter!
 
+        updateRounds(winnerid);
+        updateRounds(loserid);
+        // TODO: send fee for commiter!
     }
 
     function add(uint256 _id, uint8 _rounds, uint256 _stake) internal {
-        if (waiting == 0) {
-            waiting = _id;
+        if (isEmptyWaitlist()) {
+            waiting.push(_id);
         } else {
             startFight(_id);
         }
@@ -68,15 +71,16 @@ contract Fight {
 
     function updateRounds(uint256 _id) internal {
         if (rounds[_id] == 1) {
-            pop();
+            pop(_id);
         } else {
             uint8 newRounds = rounds[_id] - 1;
             add(_id, newRounds, stakes[_id]);
         }
     }
 
-    function pop() internal {
+    function pop(uint256 _id) internal {
         // TODO: here transfer tokens back.
+        rounds[_id] = 0;
     }
 
     function redistributeStakes(uint256 _winner, uint256 _loser) public view returns (uint256, uint256, uint256) {
@@ -85,6 +89,26 @@ contract Fight {
         uint256 winnerGain = potentialGain - platformFee;
 
         return (potentialGain, platformFee, winnerGain);
+    }
+
+    function isEmptyWaitlist() public view returns (bool) {
+        for(uint i = 0; i < waiting.length; i++) {
+            if(waiting[i] != 0) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    function isFreeSpaceWaitList() public view returns (bool) {
+        for(uint i = 0; i < waiting.length; i++) {
+            if(waiting[i] == 0) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     function min(uint256 a, uint256 b) private pure returns (uint256) {
