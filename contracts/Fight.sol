@@ -20,7 +20,7 @@ contract Fight {
     Effect public contract_effects;
     HeroesGPT public contract_char_token;
     ERC20Token public contract_token;
-    WaitList public waiting;
+    WaitList public waiting = new WaitList();
 
     uint256 public total_fights = 0;
     uint8 public fee = 0;
