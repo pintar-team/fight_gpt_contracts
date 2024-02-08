@@ -9,6 +9,16 @@ contract WaitList {
         return waiting[_value];
     }
 
+    function hasEmpty() public view returns (bool) {
+        for (uint8 i = 0; i < waiting.length; i++) {
+            if (waiting[i] != 0) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     function hasSpace() public view returns (bool) {
         for (uint8 i = 0; i < waiting.length; i++) {
             if (waiting[i] == 0) {

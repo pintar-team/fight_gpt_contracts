@@ -16,8 +16,10 @@ describe("WaitList contract", function () {
     describe("Check add and remove elements", async function() {
         it("add and pop", async function () {
 
+          expect(await waitList.hasEmpty()).to.equal(true);
           expect(await waitList.hasSpace()).to.equal(true);
           await waitList.add(1);
+          expect(await waitList.hasEmpty()).to.equal(false);
           expect(await waitList.hasSpace()).to.equal(true);
           await waitList.add(2);
           await expect(waitList.add(2)).to.be.reverted;
