@@ -16,11 +16,15 @@ describe("WaitList contract", function () {
     describe("Check add and remove elements", async function() {
         it("add and pop", async function () {
 
+          expect(await waitList.hasSpace()).to.equal(true);
           await waitList.add(1);
+          expect(await waitList.hasSpace()).to.equal(true);
           await waitList.add(2);
           await expect(waitList.add(2)).to.be.reverted;
           await waitList.add(3);
+          expect(await waitList.hasSpace()).to.equal(true);
           await waitList.add(4);
+          expect(await waitList.hasSpace()).to.equal(true);
           await waitList.add(5);
 
           await expect(waitList.add(6)).to.be.reverted;
@@ -31,7 +35,9 @@ describe("WaitList contract", function () {
           expect(await waitList.waiting(3)).to.equal(4n);
           expect(await waitList.waiting(4)).to.equal(5n);
 
+          expect(await waitList.hasSpace()).to.equal(false);
           await waitList.pop();
+          expect(await waitList.hasSpace()).to.equal(true);
 
           expect(await waitList.waiting(4)).to.equal(0n);
           expect(await waitList.waiting(0)).to.equal(2n);
