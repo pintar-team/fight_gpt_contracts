@@ -53,7 +53,7 @@ contract Fight {
 
     function add(uint256 _id, uint8 _rounds, uint256 _stake) internal {
         if (isEmptyWaitlist()) {
-            waiting.push(_id);
+            // waiting.push(_id);
         } else {
             startFight(_id);
         }
@@ -65,8 +65,8 @@ contract Fight {
     function startFight(uint256 _id) internal {
         total_fights++;
 
-        fights[total_fights] = [_id, waiting];
-        waiting = 0;
+        // fights[total_fights] = [_id, waiting];
+        // waiting = 0;
     }
 
     function updateRounds(uint256 _id) internal {
