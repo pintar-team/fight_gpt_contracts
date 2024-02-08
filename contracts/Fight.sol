@@ -80,7 +80,7 @@ contract Fight {
     function pop(uint256 _id) internal {
         // TODO: here transfer tokens back.
         rounds[_id] = 0;
-        stakes[_id] = 0;
+        // stakes[_id] = 0;
     }
 
     function add(
