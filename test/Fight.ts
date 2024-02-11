@@ -90,5 +90,55 @@ describe("CrowdSale contract", function () {
           expect(fetchRounds).to.equal(rounds);
           expect(fetchStakes).to.equal(stake);
         });
+
+        it("test lobby", async function () {
+          let tokenid0 = 4;
+          let stake0 = 130;
+          let rounds0 = 1;
+
+          let tokenid1 = 3;
+          let stake1 = 30;
+          let rounds1 = 10;
+
+          await fight.join(tokenid0, stake0, rounds0);
+          await fight.join(tokenid1, stake1, rounds1);
+
+          const totalFights = await fight.total_fights();
+
+          expect(totalFights).to.equal(1n);
+
+          const fights = await fight.fights(totalFights);
+
+          expect(fights[0]).to.equals(tokenid1);
+          expect(fights[1]).to.equals(tokenid0);
+        });
+        
+        it("test commit", async function () {
+          let tokenid0 = 2;
+          let stake0 = 500;
+          let rounds0 = 3;
+
+          let tokenid1 = 3;
+          let stake1 = 1000;
+          let rounds1 = 2;
+
+          await fight.join(tokenid0, stake0, rounds0);
+          await fight.join(tokenid1, stake1, rounds1);
+
+          const fightid = await fight.total_fights();
+
+          await fight.commit(fightid, tokenid0);
+
+          const fetchRounds0 = await fight.rounds(tokenid0);
+          const fetchStakes0 = await fight.stakes(tokenid0);
+          const fetchRounds1 = await fight.rounds(tokenid1);
+          const fetchStakes1 = await fight.stakes(tokenid1);
+
+          expect(fetchStakes0).to.equals(stake0 + (Math.min(stake0, stake1) - Math.min(stake0, stake1) * fee / 100));
+          expect(fetchStakes1).to.equals(stake1 - Math.min(stake0, stake1));
+
+          expect(fetchRounds0).to.equals(2n);
+          expect(fetchRounds1).to.equals(1n);
+        });
     });
 });

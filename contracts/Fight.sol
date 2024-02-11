@@ -54,19 +54,21 @@ contract Fight {
     function commit(uint256 _fightid, uint256 _wonid) external {
         /// TODO: add checerks.
         Lobby memory lobby = fights[_fightid];
-        uint256 winnerid = (_wonid == lobby.id0) ? lobby.id0 : lobby.id1;
-        uint256 loserid = (_wonid == lobby.id1) ? lobby.id1 : lobby.id0;
-        uint256 winstake = stakes[winnerid];
-        uint256 losestake = stakes[loserid];
+        uint256 loserid = (_wonid == lobby.id1) ? lobby.id0 : lobby.id1;
+        uint256 winstake = stakes[_wonid];
+        uint256 loserstake = stakes[loserid];
 
         (
             uint256 potentialGain,
             uint256 platformFee,
             uint256 winnerGain
-        ) = redistributeStakes(winstake, losestake);
+        ) = redistributeStakes(winstake, loserstake);
 
         stakes[loserid] -= potentialGain;
-        stakes[winnerid] += winnerGain;
+        stakes[_wonid] += winnerGain;
+
+        updateRounds(loserid);
+        updateRounds(_wonid);
     }
 
     function addWaitlist(uint256 _id) internal {
