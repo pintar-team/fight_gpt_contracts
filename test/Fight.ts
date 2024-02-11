@@ -66,7 +66,7 @@ describe("CrowdSale contract", function () {
           expect(String(contractToken)).to.equal(token.target);
         });
 
-        it("testing calc commision", async function () {
+        it("testing redistributeStakes", async function () {
           let amount0 = 100n;
           let amount1 = 3000n;
           let [potentialGain, platformFee, winnerGain] = await fight.redistributeStakes(amount0, amount1);
@@ -76,12 +76,19 @@ describe("CrowdSale contract", function () {
           expect(winnerGain).to.equal(potentialGain - platformFee);
         });
 
-        // it("test fight 2 tokens", async function () {
-        //   let user0 = accounts[3];
-        //   let user1 = accounts[4];
+        it("test join", async function () {
+          let tokenid = 2;
+          let stake = 230;
+          let rounds = 3;
 
-        //   await token.transfer(user0, 1400000000000n);
-        //   await token.transfer(user1, 1400000000000n);
-        // });
+          await fight.join(tokenid, stake, rounds);
+          const totalFights = await fight.total_fights();
+          const fetchRounds = await fight.rounds(tokenid);
+          const fetchStakes = await fight.stakes(tokenid);
+
+          expect(totalFights).to.equal(0n);
+          expect(fetchRounds).to.equal(rounds);
+          expect(fetchStakes).to.equal(stake);
+        });
     });
 });
