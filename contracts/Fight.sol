@@ -29,6 +29,18 @@ contract Fight {
     mapping(uint256 => uint8) public rounds;
     mapping(uint256 => uint256) public stakes;
 
+    constructor(
+        uint8 _fee,
+        address _effects,
+        address _char,
+        address _token
+    ) {
+        fee = _fee;
+        contract_effects = Effect(_effects);
+        contract_char_token = HeroesGPT(_char);
+        contract_token = ERC20Token(_token);
+    }
+
     function join(
         uint256 _id,
         uint256 _stake,

@@ -37,8 +37,8 @@ describe("CrowdSale contract", function () {
 
         accounts = await ethers.getSigners();
         fight = await Fight.deploy(
-          wallet,
-          serverSign.address,
+          // wallet,
+          // serverSign.address,
           fee,
           effect.target,
           heroesGPT.target,
@@ -52,8 +52,7 @@ describe("CrowdSale contract", function () {
     describe("Fight contract testing", async function() {
         it("testing constructor", async function () {
           let contractFee = await fight.fee();
-          let contractWallet = await fight.wallet();
-          let contractServer = await fight.server_address();
+          // let contractServer = await fight.server_address();
           let totalFights = await fight.total_fights();
           let contractEffects = await fight.contract_effects();
           let contractChar = await fight.contract_char_token();
@@ -61,8 +60,7 @@ describe("CrowdSale contract", function () {
 
           expect(Number(contractFee)).to.equal(fee);
           expect(Number(totalFights)).to.equal(0);
-          expect(String(contractWallet)).to.equal(wallet.address);
-          expect(String(contractServer)).to.equal(serverSign.address);
+          // expect(String(contractServer)).to.equal(serverSign.address);
           expect(String(contractEffects)).to.equal(effect.target);
           expect(String(contractChar)).to.equal(heroesGPT.target);
           expect(String(contractToken)).to.equal(token.target);
@@ -71,19 +69,19 @@ describe("CrowdSale contract", function () {
         it("testing calc commision", async function () {
           let amount0 = 100n;
           let amount1 = 3000n;
-          let [winnerGain, loserReturn, platformFee] = await fight.calculateAmount(amount0, amount1);
+          let [potentialGain, platformFee, winnerGain] = await fight.redistributeStakes(amount0, amount1);
 
-          expect(platformFee).to.equal((amount0 * 2n) / 100n * BigInt(fee));
-          expect(winnerGain).to.equal(amount0 * 2n - (amount0 * 2n) / 100n * BigInt(fee));
-          expect(loserReturn).to.equal(amount1 - amount0);
+          expect(platformFee).to.equal(potentialGain * BigInt(fee) / 100n);
+          expect(potentialGain).to.equal(Math.min(Number(amount0), Number(amount1)));
+          expect(winnerGain).to.equal(potentialGain - platformFee);
         });
 
-        it("test fight 2 tokens", async function () {
-          let user0 = accounts[3];
-          let user1 = accounts[4];
+        // it("test fight 2 tokens", async function () {
+        //   let user0 = accounts[3];
+        //   let user1 = accounts[4];
 
-          await token.transfer(user0, 1400000000000n);
-          await token.transfer(user1, 1400000000000n);
-        });
+        //   await token.transfer(user0, 1400000000000n);
+        //   await token.transfer(user1, 1400000000000n);
+        // });
     });
 });
