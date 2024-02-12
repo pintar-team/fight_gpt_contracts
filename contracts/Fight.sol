@@ -50,7 +50,11 @@ contract Fight {
         require(_stake > 0, "Stake should be larger 0");
         require(_rounds > 0, "rounds is not valid");
 
-        add(_id, _stake, _rounds);
+        address token_owner = contract_char_token.ownerOf(_id);
+
+        require(token_owner == msg.sender, "invalid tokens owner");
+
+        add(_id, _stake, _rounds, token_owner);
     }
 
     function commit(uint256 _fightid, uint256 _wonid) external {
@@ -91,7 +95,7 @@ contract Fight {
             pop(_id);
         } else {
             uint8 newRounds = rounds[_id] - 1;
-            add(_id, stakes[_id], newRounds);
+            add(_id, stakes[_id], newRounds, token_owners[_id]);
         }
     }
 
@@ -109,8 +113,12 @@ contract Fight {
     function add(
         uint256 _id,
         uint256 _stake,
-        uint8 _rounds
+        uint8 _rounds,
+        address _owner
     ) internal {
+        contract_char_token.transferFrom(_owner, address(this), _id);
+        contract_token.transferFrom(_owner, address(this), _stake);
+
         if (waiting.hasEmpty()) {
             addWaitlist(_id);
         } else {
@@ -120,14 +128,9 @@ contract Fight {
             startFight(_id, opponent);
         }
 
-        address token_owner = contract_char_token.ownerOf(_id);
-
-        contract_char_token.transferFrom(token_owner, address(this), _id);
-        contract_token.transferFrom(token_owner, address(this), _stake);
-
         stakes[_id] = _stake;
         rounds[_id] = _rounds;
-        token_owners[_id] = token_owner;
+        token_owners[_id] = _owner;
     }
 
     function redistributeStakes(uint256 _winner, uint256 _loser)
