@@ -148,13 +148,14 @@ describe("Fights contract", function () {
           let rounds1 = 3;
 
           let tokenid2 = 3;
-          let stake2 = 1000;
+          let stake2 = 500;
           let rounds2 = 10;
 
           // Server make chose who won.
           let tokens = [tokenid1, tokenid2];
           let randomIndex = Math.floor(Math.random() * tokens.length);
           let winner = tokens[randomIndex];
+          let loser = winner == tokenid1 ? tokenid2 : tokenid1;
 
           // make approve tokens player 1
           await heroesGPT.connect(player1).approve(fight.target, tokenid1);
@@ -170,19 +171,19 @@ describe("Fights contract", function () {
 
           const fightid = await fight.total_fights();
 
-          await fight.commit(fightid, winner);
+          await fight.connect(wallet).commit(fightid, winner);
 
           const fetchRounds1 = await fight.rounds(tokenid1);
-          const fetchStakes1 = await fight.stakes(tokenid1);
           const fetchRounds2 = await fight.rounds(tokenid2);
-          const fetchStakes2 = await fight.stakes(tokenid2);
 
-          // expect(fetchStakes1).to.equals(stake1 + (Math.min(stake1, stake1) - Math.min(stake1, stake2) * fee / 100));
-          // expect(fetchStakes2).to.equals(stake2 - Math.min(stake1, stake1));
+          expect(fetchRounds1).to.equals(2n);
+          expect(fetchRounds2).to.equals(9n);
 
-          // console.log(fetchRounds1, fetchRounds2);
-          // expect(fetchRounds1).to.equals(2n);
-          // expect(fetchRounds2).to.equals(1n);
+          const winnerStake = await fight.stakes(winner);
+          const loserStake = await fight.stakes(loser);
+
+          expect(winnerStake).to.equals(stake1 + (Math.min(stake1, stake1) - Math.min(stake1, stake2) * fee / 100));
+          expect(loserStake).to.equals(stake2 - Math.min(stake1, stake1));
         });
     });
 });

@@ -54,6 +54,9 @@ contract Fight {
 
         require(token_owner == msg.sender, "invalid tokens owner");
 
+        contract_char_token.transferFrom(token_owner, address(this), _id);
+        contract_token.transferFrom(token_owner, address(this), _stake);
+
         add(_id, _stake, _rounds, token_owner);
     }
 
@@ -116,9 +119,6 @@ contract Fight {
         uint8 _rounds,
         address _owner
     ) internal {
-        contract_char_token.transferFrom(_owner, address(this), _id);
-        contract_token.transferFrom(_owner, address(this), _stake);
-
         if (waiting.hasEmpty()) {
             addWaitlist(_id);
         } else {
