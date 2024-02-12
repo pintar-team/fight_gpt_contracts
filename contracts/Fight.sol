@@ -28,6 +28,7 @@ contract Fight {
     mapping(uint256 => Lobby) public fights;
     mapping(uint256 => uint8) public rounds;
     mapping(uint256 => uint256) public stakes;
+    mapping(uint256 => address) public token_owners;
 
     constructor(
         uint8 _fee,
@@ -46,8 +47,9 @@ contract Fight {
         uint256 _stake,
         uint8 _rounds
     ) external {
-        /// TODO: add checerks
-        // TODO: add transfers.
+        require(_stake > 0, "Stake should be larger 0");
+        require(_rounds > 0, "rounds is not valid");
+
         add(_id, _stake, _rounds);
     }
 
@@ -69,6 +71,8 @@ contract Fight {
 
         updateRounds(loserid);
         updateRounds(_wonid);
+
+        contract_token.transfer(msg.sender, platformFee);
     }
 
     function addWaitlist(uint256 _id) internal {
@@ -92,9 +96,14 @@ contract Fight {
     }
 
     function pop(uint256 _id) internal {
-        // TODO: here transfer tokens back.
+        address owner = token_owners[_id];
+
+        contract_token.transfer(owner, stakes[_id]);
+        contract_char_token.transferFrom(address(this), owner, _id);
+
         rounds[_id] = 0;
-        // stakes[_id] = 0;
+        stakes[_id] = 0;
+        delete token_owners[_id];
     }
 
     function add(
@@ -111,8 +120,14 @@ contract Fight {
             startFight(_id, opponent);
         }
 
+        address token_owner = contract_char_token.ownerOf(_id);
+
+        contract_char_token.transferFrom(token_owner, address(this), _id);
+        contract_token.transferFrom(token_owner, address(this), _stake);
+
         stakes[_id] = _stake;
         rounds[_id] = _rounds;
+        token_owners[_id] = token_owner;
     }
 
     function redistributeStakes(uint256 _winner, uint256 _loser)
