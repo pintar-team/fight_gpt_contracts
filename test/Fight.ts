@@ -184,6 +184,10 @@ describe("Fights contract", function () {
 
           expect(winnerStake).to.equals(stake1 + (Math.min(stake1, stake1) - Math.min(stake1, stake2) * fee / 100));
           expect(loserStake).to.equals(stake2 - Math.min(stake1, stake1));
+
+          const walletBalance = await token.balanceOf(wallet.address);
+
+          expect(walletBalance).to.equals(Math.min(stake1, stake2) * fee / 100);
         });
     });
 });
