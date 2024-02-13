@@ -60,9 +60,19 @@ contract Fight {
         add(_id, _stake, _rounds, token_owner);
     }
 
+    function claim(uint256 _id) external {
+        address owner = token_owners[_id];
+
+        require(owner == msg.sender || owner == address(0), "invalid owner");
+
+        pop(_id, owner);
+    }
+
     function commit(uint256 _fightid, uint256 _wonid) external {
-        /// TODO: add checerks.
         Lobby memory lobby = fights[_fightid];
+
+        require(lobby.id1 == 0 || lobby.id0 == 0, "invalid fight id");
+
         uint256 loserid = (_wonid == lobby.id1) ? lobby.id0 : lobby.id1;
         uint256 winstake = stakes[_wonid];
         uint256 loserstake = stakes[loserid];
@@ -94,19 +104,19 @@ contract Fight {
     }
 
      function updateRounds(uint256 _id) internal {
+        address owner = token_owners[_id];
+
         if (rounds[_id] == 1) {
-            pop(_id);
+            pop(_id, owner);
         } else {
             uint8 newRounds = rounds[_id] - 1;
-            add(_id, stakes[_id], newRounds, token_owners[_id]);
+            add(_id, stakes[_id], newRounds, owner);
         }
     }
 
-    function pop(uint256 _id) internal {
-        address owner = token_owners[_id];
-
-        contract_token.transfer(owner, stakes[_id]);
-        contract_char_token.transferFrom(address(this), owner, _id);
+    function pop(uint256 _id, address _owner) internal {
+        contract_token.transfer(_owner, stakes[_id]);
+        contract_char_token.transferFrom(address(this), _owner, _id);
 
         rounds[_id] = 0;
         stakes[_id] = 0;
