@@ -71,7 +71,7 @@ contract Fight {
     function commit(uint256 _fightid, uint256 _wonid) external {
         Lobby memory lobby = fights[_fightid];
 
-        require(lobby.id1 == 0 || lobby.id0 == 0, "invalid fight id");
+        require(lobby.id1 != 0 && lobby.id0 != 0, "invalid fight id");
 
         uint256 loserid = (_wonid == lobby.id1) ? lobby.id0 : lobby.id1;
         uint256 winstake = stakes[_wonid];
