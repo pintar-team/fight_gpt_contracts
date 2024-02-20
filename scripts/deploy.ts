@@ -19,7 +19,7 @@ async function main() {
   console.log("HeroesGPT address:", char.target);
 
   console.log("ERC20 Token contracts");
-  const ERC20Token = await ethers.getContractFactory("ERC20");
+  const ERC20Token = await ethers.getContractFactory("ERC20Token");
   const token = await ERC20Token.deploy();
   console.log("ERC20 Token address:", token.target);
 
