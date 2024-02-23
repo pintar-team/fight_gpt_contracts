@@ -9,6 +9,12 @@ import "./VerifySignature.sol";
 contract CrowdSale {
     using SafeCast for uint256;
 
+    event Bought(
+        uint256, // token id
+        address, // token owner
+        string // token url
+    );
+
     VerifySignature public immutable ec = new VerifySignature();
     HeroesGPT public char_contract;
 
@@ -53,11 +59,10 @@ contract CrowdSale {
         dex_address = _dex;
     }
 
-    function buyNative(string memory _uri, bytes memory _signature)
-        external
-        payable
-        onlyNotContract
-    {
+    function buyNative(
+        string memory _uri,
+        bytes memory _signature
+    ) external payable onlyNotContract {
         require(msg.value >= price, "Sent value is less than the price");
 
         bool verify = ec.verify(server_address, msg.sender, _uri, _signature);
@@ -74,6 +79,8 @@ contract CrowdSale {
         uint256 newTokenId = char_contract.totalSupply() + 1;
 
         char_contract.safeMint(msg.sender, newTokenId, _uri);
+
+        emit Bought(newTokenId, msg.sender, _uri);
     }
 
     // function buyUSDT(string memory _uri, bytes memory _signature, uint256 _amount) external {
