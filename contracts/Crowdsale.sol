@@ -34,11 +34,7 @@ contract CrowdSale {
         _;
     }
 
-    constructor(
-        address _server,
-        address _char,
-        address _wallet
-    ) {
+    constructor(address _server, address _char, address _wallet) {
         server_address = _server;
         char_contract = HeroesGPT(_char);
         owner = msg.sender;

@@ -17,6 +17,17 @@ contract Fight {
         uint256 id1;
     }
 
+    // emit when wait list is empty
+    event Added(
+        uint256, // token id
+        address // token owner
+    );
+    event StartedFight(
+        uint256, // first id
+        uint256, // second id
+        uint256 // fight id
+    );
+
     Effect public contract_effects;
     HeroesGPT public contract_char_token;
     ERC20Token public contract_token;
@@ -30,23 +41,14 @@ contract Fight {
     mapping(uint256 => uint256) public stakes;
     mapping(uint256 => address) public token_owners;
 
-    constructor(
-        uint8 _fee,
-        address _effects,
-        address _char,
-        address _token
-    ) {
+    constructor(uint8 _fee, address _effects, address _char, address _token) {
         fee = _fee;
         contract_effects = Effect(_effects);
         contract_char_token = HeroesGPT(_char);
         contract_token = ERC20Token(_token);
     }
 
-    function join(
-        uint256 _id,
-        uint256 _stake,
-        uint8 _rounds
-    ) external {
+    function join(uint256 _id, uint256 _stake, uint8 _rounds) external {
         require(_stake > 0, "Stake should be larger 0");
         require(_rounds > 0, "rounds is not valid");
 
@@ -94,16 +96,18 @@ contract Fight {
 
     function addWaitlist(uint256 _id) internal {
         waiting.add(_id);
-        // TODO: add Events.
+
+        emit Added(_id, msg.sender);
     }
 
     function startFight(uint256 _id, uint256 _opponent) internal {
         total_fights++;
         fights[total_fights] = Lobby(_id, _opponent);
-        // TODO: add Events.
+
+        emit StartedFight(_id, _opponent, total_fights);
     }
 
-     function updateRounds(uint256 _id) internal {
+    function updateRounds(uint256 _id) internal {
         address owner = token_owners[_id];
 
         if (rounds[_id] == 1) {
@@ -143,15 +147,10 @@ contract Fight {
         token_owners[_id] = _owner;
     }
 
-    function redistributeStakes(uint256 _winner, uint256 _loser)
-        public
-        view
-        returns (
-            uint256,
-            uint256,
-            uint256
-        )
-    {
+    function redistributeStakes(
+        uint256 _winner,
+        uint256 _loser
+    ) public view returns (uint256, uint256, uint256) {
         uint256 potentialGain = min(_winner, _loser);
         uint256 platformFee = (potentialGain * fee) / 100;
         uint256 winnerGain = potentialGain - platformFee;
