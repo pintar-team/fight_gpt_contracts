@@ -32,11 +32,6 @@ describe("CrowdSale contract", function () {
             const hash = ethers.keccak256(ethers.solidityPacked(['address', 'string'], [to.address, newURL]));
             let sig = await serverSign.signMessage(ethers.toBeArray(hash));
 
-
-            const testServer = ethers.Wallet();
-            const hash = ethers.keccak256(ethers.solidityPacked(['address', 'string'], [to.address, newURL]));
-            let sig = await serverSign.signMessage(ethers.toBeArray(hash));
-
             await crowdsale.connect(to).buyNative(newURL, sig, { 
                 value: ethers.parseEther('1.0')
             });
