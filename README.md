@@ -18,6 +18,7 @@ npx hardhat run scripts/deploy.ts --network testnet
 ```
 
 ### Contracts
+  * `server_sig`: 0xe3695975bD1A2Ebf40FA600FedAF5e4Db1b88f5f
   * `owner`: `0xD67d3B191EDDE0B4fC6dF994E0DEf522cDF9275c`
   * `server`: `0x145c93c09b7E811020B557Cb2EE12bBCacfAd1D5`
   * `HeroesGPT`:`0x91072814f7a2cBF1e9B271Bfe9d867b432E593AC`
