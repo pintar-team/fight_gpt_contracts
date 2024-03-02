@@ -1,6 +1,4 @@
-# Sample Hardhat Project
-
-Here is `FightGPT` contracts.
+# Here is `FightGPT` contracts.
 
 ENV vars:
 ```
@@ -18,12 +16,11 @@ npx hardhat run scripts/deploy.ts --network testnet
 ```
 
 ### Contracts
-  * `server_sig`: 0xe3695975bD1A2Ebf40FA600FedAF5e4Db1b88f5f
-  * `owner`: `0xD67d3B191EDDE0B4fC6dF994E0DEf522cDF9275c`
-  * `server`: `0x145c93c09b7E811020B557Cb2EE12bBCacfAd1D5`
-  * `HeroesGPT`:`0x91072814f7a2cBF1e9B271Bfe9d867b432E593AC`
-  * `ERC20Token`: `0xd17e9271e4e88CC8A2916f814da6f0E2ED7013B6`
-  * `Item`: `0x4395cff149c158B3C714777D653e9D28D3e8ea4e`
-  * `Effect`: `0xcF0A914f667f6BdE3376644C77e6fC5e2762F2c5`
-  * `Fight`: `0x064daF0630F95A403d6AbB4db1F54999f23FCF68`
-  * `CrowdSale`: `0xFAbC3AE370d8C1c9112653E516414112DdcBd914`
+  * `server_sig`: `0xe3695975bD1A2Ebf40FA600FedAF5e4Db1b88f5f`
+  * `owner`: `0x47F916593b684B712a6099135aD6013d288507ca`
+  * `HeroesGPT`: `0xfc62fE08b2a7e05DcBeE9AB4283a46a9EE13F9A6`
+  * `ERC20Token`: `0x92FE4ebbb1e1b2b4b88413DfBC3D7809D5f31226`
+  * `Item`: `0xA8F42dbBAB784De0B0E1E2642605300137dcA4A8`
+  * `Effect`: `0x6200b5Ec0011651928b2493deef6B1987937B3aC`
+  * `Fight`: `0x122577111d815F3B1117255121333d1CEAd5B1ad`
+  * `CrowdSale`: `0x6AB6678e9fE8A2D950E891Bd9e2F501298ab80B1`

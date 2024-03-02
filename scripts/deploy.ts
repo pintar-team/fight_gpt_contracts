@@ -4,7 +4,7 @@ const FIGHTS_FEE = 1; // 1%
 
 async function main() {
   const [deployer] = await ethers.getSigners();
-  const server = process.env.SERVER_ADDRESS || '0xD67d3B191EDDE0B4fC6dF994E0DEf522cDF9275c';
+  const server = process.env.SERVER_ADDRESS || '0xe3695975bD1A2Ebf40FA600FedAF5e4Db1b88f5f';
 
   if (!ethers.isAddress(server)) {
     throw new Error("Invalid server address");
