@@ -61,11 +61,18 @@ contract CrowdSale {
 
     function buyNative(
         string memory _uri,
+        uint256 _token_id,
         bytes memory _signature
     ) external payable onlyNotContract {
         require(msg.value >= price, "Sent value is less than the price");
 
-        bool verify = ec.verify(server_address, msg.sender, _uri, _signature);
+        string memory payload = concatenate(_uri, _token_id);
+        bool verify = ec.verify(
+            server_address,
+            msg.sender,
+            payload,
+            _signature
+        );
         require(verify, "invalid signautre");
 
         uint256 change = msg.value - price;
@@ -75,12 +82,8 @@ contract CrowdSale {
         }
 
         payable(wallet).transfer(price);
-
-        uint256 newTokenId = char_contract.totalSupply() + 1;
-
-        char_contract.safeMint(msg.sender, newTokenId, _uri);
-
-        emit Bought(newTokenId, msg.sender, _uri);
+        char_contract.safeMint(msg.sender, _token_id, _uri);
+        emit Bought(_token_id, msg.sender, _uri);
     }
 
     // function buyUSDT(string memory _uri, bytes memory _signature, uint256 _amount) external {
@@ -89,5 +92,16 @@ contract CrowdSale {
 
     function getPrice() public view returns (uint256) {
         return price;
+    }
+
+    function concatenate(
+        string memory _uri,
+        uint256 token_id
+    ) public pure returns (string memory) {
+        return string(abi.encodePacked(_uri, uintToString(token_id)));
+    }
+
+    function uintToString(uint256 value) internal pure returns (string memory) {
+        return Strings.toString(value);
     }
 }
