@@ -2,7 +2,7 @@ import { ethers } from "hardhat";
 import { expect } from "chai";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 
-describe("CrowdSale contract", function () {
+describe("CrowdSale contract", function() {
     let Crowdsale: any;
     let crowdsale: any;
     let HeroesGPT: any;
@@ -10,7 +10,7 @@ describe("CrowdSale contract", function () {
     let serverSign: HardhatEthersSigner;
     let accounts: HardhatEthersSigner[];
 
-    beforeEach(async function () {
+    beforeEach(async function() {
         [serverSign, ...accounts] = await ethers.getSigners();
 
         HeroesGPT = await ethers.getContractFactory("HeroesGPT");
@@ -26,28 +26,28 @@ describe("CrowdSale contract", function () {
     });
 
     describe("try buy native token", async function() {
-        it("sign sig and try buy", async function () {
+        it("sign sig and try buy", async function() {
             const newURL = "test_url";
             const to = accounts[2];
-            const hash = ethers.keccak256(ethers.solidityPacked(['address', 'string'], [to.address, newURL]));
+            const tokenId = 42n;
+            const hash = ethers.keccak256(ethers.solidityPacked(['address', 'string', 'uint256'], [to.address, newURL, tokenId]));
             let sig = await serverSign.signMessage(ethers.toBeArray(hash));
 
-            await crowdsale.connect(to).buyNative(newURL, sig, { 
+            await crowdsale.connect(to).buyNative(newURL, tokenId, sig, {
                 value: ethers.parseEther('1.0')
             });
 
-            expect(await heroesGPT.ownerOf(1)).to.equal(to.address);
-            expect(await heroesGPT.tokenURI(1)).to.equal(newURL);
+            expect(await heroesGPT.ownerOf(tokenId)).to.equal(to.address);
+            expect(await heroesGPT.tokenURI(tokenId)).to.equal(newURL);
 
             expect(await accounts[5].provider.getBalance(accounts[5])).to.equal(10000000000000000010000n);
 
             // invalid sig
             sig = await accounts[8].signMessage(ethers.toBeArray(hash));
-
-            await expect(crowdsale.connect(to).buyNative(newURL, sig, { 
+            await expect(crowdsale.connect(to).buyNative(newURL, tokenId, sig, {
                 value: ethers.parseEther('0.1')
             })).to.be.reverted;
-            await expect(crowdsale.connect(to).buyNative(newURL, sig, { 
+            await expect(crowdsale.connect(to).buyNative(newURL, tokenId, sig, {
                 value: ethers.parseEther('1.0')
             })).to.be.reverted;
         });

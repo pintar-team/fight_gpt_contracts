@@ -96,9 +96,9 @@ contract CrowdSale {
 
     function concatenate(
         string memory _uri,
-        uint256 token_id
+        uint256 _token_id
     ) public pure returns (string memory) {
-        return string(abi.encodePacked(_uri, uintToString(token_id)));
+        return string(abi.encodePacked(_uri, _token_id));
     }
 
     function uintToString(uint256 value) internal pure returns (string memory) {
