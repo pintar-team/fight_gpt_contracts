@@ -71,7 +71,7 @@ contract Fight {
 
         require(owner == msg.sender || owner == address(0), "invalid owner");
 
-        waiting.add(_id);
+        waiting.remove(_id);
         pop(_id, owner);
 
         emit Removed(_id, owner);
