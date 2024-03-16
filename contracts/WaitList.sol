@@ -38,6 +38,26 @@ contract WaitList {
         count++;
     }
 
+    function remove(uint256 _value) public {
+        require(count > 0, "WaitList is empty");
+        bool found = false;
+
+        for (uint256 i = 0; i < count; i++) {
+            if (waiting[i] == _value) {
+                found = true;
+                for (uint256 j = i; j < count - 1; j++) {
+                    waiting[j] = waiting[j + 1];
+                }
+                break;
+            }
+        }
+
+        require(found, "Element not found");
+
+        waiting[count - 1] = 0;
+        count--;
+    }
+
     function pop() public returns (uint256) {
         require(count > 0, "WaitList is empty");
         uint256 value = waiting[0];
