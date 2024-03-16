@@ -22,6 +22,10 @@ contract Fight {
         uint256, // token id
         address // token owner
     );
+    event Removed(
+        uint256, // token id
+        address // token owner
+    );
     event StartedFight(
         uint256, // first id
         uint256, // second id
@@ -62,12 +66,15 @@ contract Fight {
         add(_id, _stake, _rounds, token_owner);
     }
 
-    function claim(uint256 _id) external {
+    function remove(uint256 _id) external {
         address owner = token_owners[_id];
 
         require(owner == msg.sender || owner == address(0), "invalid owner");
 
+        waiting.add(_id);
         pop(_id, owner);
+
+        emit Removed(_id, owner);
     }
 
     function commit(uint256 _fightid, uint256 _wonid) external {
