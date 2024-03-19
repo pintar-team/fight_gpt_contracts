@@ -9,6 +9,16 @@ contract WaitList {
         return waiting[_value];
     }
 
+    function has(uint256 _id) public view returns (bool) {
+        for (uint8 i = 0; i < waiting.length; i++) {
+            if (waiting[i] == _id) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     function hasEmpty() public view returns (bool) {
         for (uint8 i = 0; i < waiting.length; i++) {
             if (waiting[i] != 0) {

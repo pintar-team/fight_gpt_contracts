@@ -69,6 +69,12 @@ describe("WaitList contract", function() {
       await waitList.add(3);
       await waitList.add(4);
 
+      expect(await waitList.has(1)).to.equal(true);
+      expect(await waitList.has(2)).to.equal(true);
+      expect(await waitList.has(3)).to.equal(true);
+      expect(await waitList.has(4)).to.equal(true);
+      expect(await waitList.has(5)).to.equal(false);
+
       expect(await waitList.count()).to.equal(4n);
       expect(await waitList.waiting(0)).to.equal(1n);
       expect(await waitList.waiting(1)).to.equal(2n);

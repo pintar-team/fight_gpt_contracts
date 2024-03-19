@@ -55,6 +55,7 @@ contract Fight {
     function join(uint256 _id, uint256 _stake, uint8 _rounds) external {
         require(_stake > 0, "Stake should be larger 0");
         require(_rounds > 0, "rounds is not valid");
+        require(waiting.has(_id), "rounds is not valid");
 
         address token_owner = contract_char_token.ownerOf(_id);
 
