@@ -150,6 +150,7 @@ describe("Fights contract", function() {
 
       // try join with tokens and stake...
       await fight.connect(player0).join(tokenid0, stake0, rounds0);
+      await expect(fight.connect(player0).join(tokenid0, stake0, rounds0)).to.be.reverted;
       await expect(fight.connect(player1).join(tokenid0, stake1, rounds1)).to.be.reverted;
       await fight.connect(player1).join(tokenid1, stake1, rounds1);
 
@@ -212,5 +213,4 @@ describe("Fights contract", function() {
 
       expect(walletBalance).to.equals(Math.min(stake1, stake2) * fee / 100);
     });
-  });
-});
+  }); });
