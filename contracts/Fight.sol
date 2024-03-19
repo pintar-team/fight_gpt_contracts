@@ -42,7 +42,7 @@ contract Fight {
     uint256 public total_fights = 0;
     uint256 public min_stake = 1;
     uint256 public min_rounds = 1;
-    uint256 public max_rounds = 5;
+    uint256 public max_rounds = 10;
     uint8 public fee = 0;
 
     mapping(uint256 => Lobby) public fights;
@@ -50,7 +50,14 @@ contract Fight {
     mapping(uint256 => uint256) public stakes;
     mapping(uint256 => address) public token_owners;
 
-    constructor(uint8 _fee, address _effects, address _char, address _token) {
+    constructor(
+        address _signer,
+        uint8 _fee,
+        address _effects,
+        address _char,
+        address _token
+    ) {
+        server_address = _signer;
         fee = _fee;
         contract_effects = Effect(_effects);
         contract_char_token = HeroesGPT(_char);

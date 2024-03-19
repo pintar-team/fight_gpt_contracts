@@ -38,7 +38,7 @@ describe("Fights contract", function() {
     accounts = await ethers.getSigners();
     fight = await Fight.deploy(
       // wallet,
-      // serverSign.address,
+      serverSign,
       fee,
       effect.target,
       heroesGPT.target,
@@ -64,7 +64,7 @@ describe("Fights contract", function() {
   describe("Fight contract testing", async function() {
     it("testing constructor", async function() {
       let contractFee = await fight.fee();
-      // let contractServer = await fight.server_address();
+      let contractServer = await fight.server_address();
       let totalFights = await fight.total_fights();
       let contractEffects = await fight.contract_effects();
       let contractChar = await fight.contract_char_token();
@@ -72,7 +72,7 @@ describe("Fights contract", function() {
 
       expect(Number(contractFee)).to.equal(fee);
       expect(Number(totalFights)).to.equal(0);
-      // expect(String(contractServer)).to.equal(serverSign.address);
+      expect(String(contractServer)).to.equal(serverSign.address);
       expect(String(contractEffects)).to.equal(effect.target);
       expect(String(contractChar)).to.equal(heroesGPT.target);
       expect(String(contractToken)).to.equal(token.target);
@@ -194,8 +194,13 @@ describe("Fights contract", function() {
       await fight.connect(player2).join(tokenid2, stake2, rounds2);
 
       const fightid = await fight.total_fights();
+      const hash = ethers.keccak256(ethers.solidityPacked(
+        ['address', 'uint256', 'uint256', 'uint256'],
+        [wallet.address, fightid, winner, loser]
+      ));
+      const sig = await serverSign.signMessage(ethers.toBeArray(hash));
 
-      await fight.connect(wallet).commit(fightid, winner);
+      await fight.connect(wallet).commit(fightid, winner, sig);
 
       const fetchRounds1 = await fight.rounds(tokenid1);
       const fetchRounds2 = await fight.rounds(tokenid2);
@@ -213,4 +218,5 @@ describe("Fights contract", function() {
 
       expect(walletBalance).to.equals(Math.min(stake1, stake2) * fee / 100);
     });
-  }); });
+  });
+});
