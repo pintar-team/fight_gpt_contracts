@@ -38,6 +38,9 @@ contract Fight {
     WaitList public waiting = new WaitList();
 
     uint256 public total_fights = 0;
+    uint256 public min_stake = 1;
+    uint256 public min_rounds = 1;
+    uint256 public max_rounds = 5;
     uint8 public fee = 0;
 
     mapping(uint256 => Lobby) public fights;
@@ -53,8 +56,11 @@ contract Fight {
     }
 
     function join(uint256 _id, uint256 _stake, uint8 _rounds) external {
-        require(_stake > 0, "Stake should be larger 0");
-        require(_rounds > 0, "rounds is not valid");
+        require(_stake >= min_stake, "Stake should be larger 0");
+        require(
+            _rounds >= min_rounds && _rounds <= max_rounds,
+            "rounds is not valid"
+        );
         require(!waiting.has(_id), "Already in waitlist");
 
         address token_owner = contract_char_token.ownerOf(_id);
