@@ -36,7 +36,9 @@ contract Fight {
     HeroesGPT public contract_char_token;
     ERC20Token public contract_token;
     WaitList public waiting = new WaitList();
+    VerifySignature public immutable ec = new VerifySignature();
 
+    address public server_address;
     uint256 public total_fights = 0;
     uint256 public min_stake = 1;
     uint256 public min_rounds = 1;
@@ -84,12 +86,25 @@ contract Fight {
         emit Removed(_id, owner);
     }
 
-    function commit(uint256 _fightid, uint256 _wonid) external {
+    function commit(
+        uint256 _fightid,
+        uint256 _wonid,
+        bytes memory _signature
+    ) external {
         Lobby memory lobby = fights[_fightid];
 
         require(lobby.id1 != 0 && lobby.id0 != 0, "invalid fight id");
 
         uint256 loserid = (_wonid == lobby.id1) ? lobby.id0 : lobby.id1;
+        string memory payload = concatenate(_fightid, _wonid, loserid);
+        bool verify = ec.verify(
+            server_address,
+            msg.sender,
+            payload,
+            _signature
+        );
+        require(verify, "invalid signautre");
+
         uint256 winstake = stakes[_wonid];
         uint256 loserstake = stakes[loserid];
 
@@ -170,6 +185,14 @@ contract Fight {
         uint256 winnerGain = potentialGain - platformFee;
 
         return (potentialGain, platformFee, winnerGain);
+    }
+
+    function concatenate(
+        uint256 _fightid,
+        uint256 _wonid,
+        uint256 _loseid
+    ) public pure returns (string memory) {
+        return string(abi.encodePacked(_fightid, _wonid, _loseid));
     }
 
     function min(uint256 a, uint256 b) private pure returns (uint256) {
