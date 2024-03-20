@@ -17,11 +17,6 @@ contract Fight {
         uint256 id1;
     }
 
-    // emit when wait list is empty
-    event Added(
-        uint256, // token id
-        address // token owner
-    );
     event StartedFight(
         uint256, // first id
         uint256, // second id
@@ -133,8 +128,6 @@ contract Fight {
 
     function addWaitlist(uint256 _id) internal {
         waiting.add(_id);
-
-        emit Added(_id, msg.sender);
     }
 
     function startFight(uint256 _id, uint256 _opponent) internal {
