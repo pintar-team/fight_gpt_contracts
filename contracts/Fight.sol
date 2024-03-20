@@ -22,14 +22,15 @@ contract Fight {
         uint256, // token id
         address // token owner
     );
-    event Removed(
-        uint256, // token id
-        address // token owner
-    );
     event StartedFight(
         uint256, // first id
         uint256, // second id
         uint256 // fight id
+    );
+    event FinishedFight(
+        uint256, // fight id
+        uint256, // won id
+        uint256 // lose id
     );
 
     Effect public contract_effects;
@@ -89,8 +90,6 @@ contract Fight {
 
         waiting.remove(_id);
         pop(_id, owner);
-
-        emit Removed(_id, owner);
     }
 
     function commit(
@@ -128,6 +127,8 @@ contract Fight {
         updateRounds(_wonid);
 
         contract_token.transfer(msg.sender, platformFee);
+
+        emit FinishedFight(_fightid, _wonid, loserid);
     }
 
     function addWaitlist(uint256 _id) internal {
