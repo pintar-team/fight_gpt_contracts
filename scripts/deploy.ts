@@ -2,6 +2,12 @@ import { ethers } from "hardhat";
 
 const FIGHTS_FEE = 1; // 1%
 
+const TestTokenHolders = [
+  '0xBC497c059F4E0bA1146c36a646924d6384039D0E',
+  '0xA07EdBA943581E2352E9Cb369218B47A04dC4436',
+];
+
+
 async function main() {
   const [deployer] = await ethers.getSigners();
   const server = process.env.SERVER_ADDRESS || '0xe3695975bD1A2Ebf40FA600FedAF5e4Db1b88f5f';
@@ -40,7 +46,9 @@ async function main() {
 
   console.log("Deploying Fight contracts, use fee", FIGHTS_FEE);
   const Fight = await ethers.getContractFactory("Fight");
+
   const fight = await Fight.deploy(
+    server,
     FIGHTS_FEE,
     effect.target,
     char.target,
@@ -52,6 +60,12 @@ async function main() {
   const role = await char.MINTER_ROLE();
 
   await char.grantRole(role, crowdSale.target);
+
+  //Transfer tokens to test holders for testing (decimals = 18), transer 1 token. total 42
+  for (let i = 0; i < TestTokenHolders.length; i++) {
+    console.log('transfer token to', TestTokenHolders[i]);
+    await token.transfer(TestTokenHolders[i], '1000000000000000000');
+  }
 }
 
 main().catch((error) => {
