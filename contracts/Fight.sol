@@ -45,6 +45,7 @@ contract Fight {
     mapping(uint256 => uint8) public rounds;
     mapping(uint256 => uint256) public stakes;
     mapping(uint256 => address) public token_owners;
+    mapping(address => uint256) public owners_tokens;
 
     constructor(
         address _signer,
@@ -70,6 +71,7 @@ contract Fight {
 
         address token_owner = contract_char_token.ownerOf(_id);
 
+        require(owners_tokens[token_owner] == 0, "Owner already in fights");
         require(token_owner == msg.sender, "invalid tokens owner");
 
         contract_char_token.transferFrom(token_owner, address(this), _id);
@@ -154,7 +156,9 @@ contract Fight {
 
         rounds[_id] = 0;
         stakes[_id] = 0;
+
         delete token_owners[_id];
+        delete owners_tokens[_owner];
     }
 
     function add(
@@ -175,6 +179,7 @@ contract Fight {
         stakes[_id] = _stake;
         rounds[_id] = _rounds;
         token_owners[_id] = _owner;
+        owners_tokens[_owner] = _id;
     }
 
     function redistributeStakes(

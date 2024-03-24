@@ -53,6 +53,7 @@ describe("Fights contract", function() {
     await heroesGPT.connect(minter).safeMint(accounts[6].address, 2, "");
     await heroesGPT.connect(minter).safeMint(accounts[7].address, 3, "");
     await heroesGPT.connect(minter).safeMint(accounts[8].address, 4, "");
+    await heroesGPT.connect(minter).safeMint(accounts[8].address, 5, "");
 
     // transfer ERC20 tokens for players...
     await token.transfer(accounts[5], 1000);
@@ -91,6 +92,7 @@ describe("Fights contract", function() {
     it("test add and remove ", async function() {
       let player = accounts[8];
       let tokenid = 4;
+      let anOtherTokenid = 5;
       let stake = 500;
       let rounds = 3;
 
@@ -98,6 +100,7 @@ describe("Fights contract", function() {
       await heroesGPT.connect(player).approve(fight.target, tokenid);
       await token.connect(player).approve(fight.target, stake);
       await fight.connect(player).join(tokenid, stake, rounds);
+      await expect(fight.connect(player).join(anOtherTokenid, stake, rounds)).to.be.reverted;
 
       let newowner = await heroesGPT.ownerOf(tokenid);
 
