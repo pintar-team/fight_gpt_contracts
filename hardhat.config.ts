@@ -7,7 +7,7 @@ const config: HardhatUserConfig = {
     testnet: {
       url: "https://data-seed-prebsc-2-s2.bnbchain.org:8545",
       accounts: [`0x${process.env.PRIVATE_KEY}`],
-      gasPrice: 225000000000,
+      gasPrice: 22500000000,
     }
   }
 };

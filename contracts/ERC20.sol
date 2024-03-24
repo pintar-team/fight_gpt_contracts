@@ -11,7 +11,7 @@ contract ERC20Token is IERC20 {
     mapping(address => uint256) balances;
     mapping(address => mapping(address => uint256)) allowed;
 
-    uint256 totalSupply_ = 4200000000000;
+    uint256 totalSupply_ = 42000000000000000000000000;
 
     constructor() {
         balances[msg.sender] = totalSupply_;
