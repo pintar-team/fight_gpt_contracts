@@ -9,7 +9,7 @@ import "./ERC20.sol";
 import "./VerifySignature.sol";
 import "./WaitList.sol";
 
-contract Fight {
+contract Fight is WaitList {
     using SafeCast for uint256;
 
     struct Lobby {
@@ -31,7 +31,6 @@ contract Fight {
     Effect public contract_effects;
     HeroesGPT public contract_char_token;
     ERC20Token public contract_token;
-    WaitList public waiting = new WaitList();
     VerifySignature public immutable ec = new VerifySignature();
 
     address public server_address;
@@ -67,7 +66,7 @@ contract Fight {
             _rounds >= min_rounds && _rounds <= max_rounds,
             "rounds is not valid"
         );
-        require(!waiting.has(_id), "Already in waitlist");
+        require(!super.has(_id), "Already in waitlist");
 
         address token_owner = contract_char_token.ownerOf(_id);
 
@@ -85,7 +84,7 @@ contract Fight {
 
         require(owner == msg.sender || owner == address(0), "invalid owner");
 
-        waiting.remove(_id);
+        super.remove_w(_id);
         pop(_id, owner);
     }
 
@@ -129,7 +128,7 @@ contract Fight {
     }
 
     function addWaitlist(uint256 _id) internal {
-        waiting.add(_id);
+        super.add(_id);
     }
 
     function startFight(uint256 _id, uint256 _opponent) internal {
@@ -167,12 +166,12 @@ contract Fight {
         uint8 _rounds,
         address _owner
     ) internal {
-        if (waiting.hasEmpty()) {
+        if (super.hasEmpty()) {
             addWaitlist(_id);
         } else {
-            uint256 opponent = waiting.get(0);
+            uint256 opponent = super.get(0);
 
-            waiting.pop();
+            super.pop();
             startFight(_id, opponent);
         }
 

@@ -39,7 +39,7 @@ contract WaitList {
         return false;
     }
 
-    function add(uint256 _value) public {
+    function add(uint256 _value) internal {
         require(count < waiting.length, "WaitList is full");
         for (uint256 i = 0; i < count; i++) {
             require(waiting[i] != _value, "Element already exists");
@@ -48,7 +48,7 @@ contract WaitList {
         count++;
     }
 
-    function remove(uint256 _value) public {
+    function remove_w(uint256 _value) internal {
         require(count > 0, "WaitList is empty");
         bool found = false;
 
@@ -68,7 +68,7 @@ contract WaitList {
         count--;
     }
 
-    function pop() public returns (uint256) {
+    function pop() internal returns (uint256) {
         require(count > 0, "WaitList is empty");
         uint256 value = waiting[0];
         for (uint8 i = 1; i < count; i++) {
