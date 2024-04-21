@@ -25,14 +25,16 @@ describe("TokenPreSale", function() {
     const tokenAddress = await tokenPreSale.token();
 
     token = await ethers.getContractAt("IERC20", tokenAddress);
+    console.log('init', await ethers.provider.getBlockNumber());
   });
 
   it("Should initiate the sale correctly", async function() {
+    const currentBlockNumber = await ethers.provider.getBlockNumber();
     await expect(tokenPreSale.initiateSale(1000))
       .to.emit(tokenPreSale, "SaleInitiated")
       .withArgs(
-        BigInt((await ethers.provider.getBlockNumber()) + 1),
-        BigInt((await ethers.provider.getBlockNumber()) + 1001),
+        BigInt((currentBlockNumber) + 2), // 2 because the tx in current block + 1
+        BigInt((currentBlockNumber) + 1002), // 1002 because (current_block + 1) - duration
         ethers.parseEther("1"), // min_contribution
         ethers.parseEther("10")  // max_contribution
       );
