@@ -165,8 +165,7 @@ contract TokenPreSale {
         throwIfDeadline
         throwIfCooldown
     {
-        bool is_claimed = claim_state[msg.sender];
-        require(!is_claimed, "Already claimed");
+        require(!claim_state[msg.sender], "Already claimed");
 
         uint256 current_contribution = contribution[msg.sender];
         bool is_underlow = total_contribution < min_contribution;
@@ -246,6 +245,7 @@ contract TokenPreSale {
         }
 
         cooldown_block = block.number + cooldown;
+        finished = true;
         emit Finished();
     }
 
@@ -277,8 +277,6 @@ contract TokenPreSale {
         require(_startblock < _endblock, "Invalid end block");
 
         started = true;
-        start_block = _startblock;
-        end_block = _endblock;
         deadline_block = _endblock + deadline;
         min_contribution = token_price * target_minimum;
         max_contribution = token_price * target_maximum;
