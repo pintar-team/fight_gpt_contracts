@@ -11,9 +11,9 @@ describe("TokenPreSale", function() {
   let addr2: HardhatEthersSigner;
   let addresses: HardhatEthersSigner[];
 
-  const tokenPrice = ethers.parseEther("0.1");
-  const targetMaximum = ethers.parseEther("1000");
-  const targetMinimum = ethers.parseEther("100");
+  const tokenPrice = ethers.parseEther("0.0000001");
+  const targetMaximum = ethers.parseEther("1");
+  const targetMinimum = ethers.parseEther("0.01");
   const cooldownPeriod = 3600;
   const deadline = 7200;
 
@@ -72,4 +72,42 @@ describe("TokenPreSale", function() {
     });
   });
 
+  describe("contribute", function() {
+    const duration = 1000;
+
+    it("Should allow multiple accounts to contribute", async function() {
+      await token.approve(tokenPreSale.target, targetMaximum);
+      await tokenPreSale.initiatePresale(duration);
+
+      const contribution1 = ethers.parseEther("1");
+      const contribution2 = ethers.parseEther("2");
+      const contribution3 = ethers.parseEther("1.5");
+
+      await tokenPreSale.connect(addr1).contribute({ value: contribution1 });
+      await tokenPreSale.connect(addr2).contribute({ value: contribution2 });
+      await tokenPreSale.connect(owner).contribute({ value: contribution3 });
+
+      expect(await tokenPreSale.contribution(addr1.address)).to.equal(contribution1);
+      expect(await tokenPreSale.contribution(addr2.address)).to.equal(contribution2);
+      expect(await tokenPreSale.contribution(owner.address)).to.equal(contribution3);
+      expect(await tokenPreSale.totalContribution()).to.equal(
+        contribution1 + contribution2 + contribution3
+      );
+    });
+
+    it("Should fail if presale is not active", async function() {
+      await expect(tokenPreSale.contribute({ value: ethers.parseEther("1") })).to.be.revertedWith(
+        "Presale is not active"
+      );
+    });
+
+    it("Should fail if contribution amount is invalid", async function() {
+      await token.approve(tokenPreSale.target, targetMaximum);
+      await tokenPreSale.initiatePresale(duration);
+
+      await expect(tokenPreSale.contribute({ value: 0 })).to.be.revertedWith(
+        "Invalid contribution amount"
+      );
+    });
+  });
 });
