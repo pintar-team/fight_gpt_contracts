@@ -84,7 +84,7 @@ describe("TokenPreSale", function() {
       const contribution = ethers.parseEther("5");
       await tokenPreSale.connect(addr1).contribute({ value: contribution });
 
-      await mine(await tokenPreSale.endBlock());
+      await mine(duration);
       const tx = await tokenPreSale.finishSale();
 
       expect(await tokenPreSale.finished()).to.equal(true);
@@ -165,24 +165,20 @@ describe("TokenPreSale", function() {
     const duration = 1000;
 
     it("Should allow multiple contributors to claim tokens", async function() {
-      // await token.approve(tokenPreSale.target, targetMaximum);
-      // await tokenPreSale.initiatePresale(duration);
-      //
-      // const contribution = ethers.parseEther("5");
-      // await tokenPreSale.connect(addr1).contribute({ value: contribution });
+      await token.approve(tokenPreSale.target, targetMaximum);
+      await tokenPreSale.initiatePresale(duration);
 
-      // console.log(await tokenPreSale.deadlineBlock(), await ethers.provider.getBlockNumber());
-      // await mine(await tokenPreSale.endBlock());
-      //
-      // console.log(await tokenPreSale.deadlineBlock(), await ethers.provider.getBlockNumber());
-      // const tx = await tokenPreSale.finishSale();
-      //
-      // console.log(tx);
+      const contribution = ethers.parseEther("5");
+      await tokenPreSale.connect(addr1).contribute({ value: contribution });
 
-      // expect(await tokenPreSale.finished()).to.equal(true);
-      // expect(await tokenPreSale.cooldownBlock()).to.equal(tx.blockNumber + cooldownPeriod);
-      //
-      // await expect(tx).to.emit(tokenPreSale, "Finished");
+      await mine(duration);
+
+      console.log('current block', await ethers.provider.getBlockNumber());
+      console.log('endBlock', await tokenPreSale.endBlock());
+
+      console.log('block.number >= endBlock', await ethers.provider.getBlockNumber() >= await tokenPreSale.endBlock());
+      console.log('block.number < deadlineBlock', await ethers.provider.getBlockNumber() < await tokenPreSale.deadlineBlock());
+      await tokenPreSale.finishSale();
     });
   });
 });
