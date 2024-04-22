@@ -181,47 +181,66 @@ describe("TokenPreSale", function() {
   describe("claim", function() {
     const duration = 1000;
 
-    // it("should allow multiple contributors to claim tokens", async function() {
-    //   await token.approve(tokenPreSale.target, targetMaximum);
-    //   await tokenPreSale.initiatePresale(duration);
-    //
-    //   const contribution1 = ethers.parseEther("0.5");
-    //   await tokenPreSale.connect(addr1).contribute({ value: contribution1 });
-    //
-    //   const contribution2 = ethers.parseEther("0.3");
-    //   await tokenPreSale.connect(addr2).contribute({ value: contribution2 });
-    //
-    //   expect(await tokenPreSale.contribution(addr1.address)).to.equal(contribution1);
-    //   expect(await tokenPreSale.contribution(addr2.address)).to.equal(contribution2);
-    //
-    //   expect(await tokenPreSale.claimState(addr1.address)).to.equal(false);
-    //   expect(await tokenPreSale.claimState(addr2.address)).to.equal(false);
-    //
-    //   await mine(duration);
-    //   await tokenPreSale.finishSale();
-    //   await mine(cooldownPeriod);
-    //
-    //   console.log('totalContribution', await tokenPreSale.totalContribution());
-    //   console.log('minContribution', await tokenPreSale.minContribution());
-    //
-    //   await expect(tokenPreSale.connect(addr1).claim())
-    //     .to.emit(tokenPreSale, "Claimed")
-    //     .to.emit(tokenPreSale, "TokenClaimed");
-    //
-    //   await expect(tokenPreSale.connect(addr2).claim())
-    //     .to.emit(tokenPreSale, "Claimed")
-    //     .to.emit(tokenPreSale, "TokenClaimed");
-    //
-    //   expect(await tokenPreSale.claimState(addr1.address)).to.equal(true);
-    //   expect(await tokenPreSale.claimState(addr2.address)).to.equal(true);
-    //
-    //   const addr1Balance = await token.balanceOf(addr1.address);
-    //   const addr2Balance = await token.balanceOf(addr2.address);
-    //
-    //   console.log(addr1Balance, addr2Balance);
-    //
-    //   // expect(addr2Balance).to.equal(ethers.parseEther("30"));
-    //   // expect(addr1Balance).to.equal(ethers.parseEther("50"));
-    // });
+    function calcTokenAmount(currentContribution: bigint, totalContribution: bigint, maxContribution: bigint): bigint {
+      let realContribution: bigint;
+
+      if (totalContribution > maxContribution) {
+        realContribution = (currentContribution * maxContribution) / totalContribution;
+      } else {
+        realContribution = currentContribution;
+      }
+
+      const tokenAmount: bigint = realContribution / tokenPrice;
+      return tokenAmount;
+    }
+
+    it("should allow multiple contributors to claim tokens", async function() {
+      await token.approve(tokenPreSale.target, targetMaximum);
+      await tokenPreSale.initiatePresale(duration);
+
+      const contribution1 = tokenPrice * 2n;
+      await tokenPreSale.connect(addr1).contribute({ value: contribution1 });
+
+      const contribution2 = tokenPrice * 4n;
+      await tokenPreSale.connect(addr2).contribute({ value: contribution2 });
+
+      expect(await tokenPreSale.contribution(addr1.address)).to.equal(contribution1);
+      expect(await tokenPreSale.contribution(addr2.address)).to.equal(contribution2);
+
+      expect(await tokenPreSale.claimState(addr1.address)).to.equal(false);
+      expect(await tokenPreSale.claimState(addr2.address)).to.equal(false);
+
+      await mine(duration);
+      await tokenPreSale.finishSale();
+      await mine(cooldownPeriod);
+
+      await expect(tokenPreSale.connect(addr1).claim())
+        .to.emit(tokenPreSale, "Claimed")
+        .to.emit(tokenPreSale, "TokenClaimed");
+
+      await expect(tokenPreSale.connect(addr2).claim())
+        .to.emit(tokenPreSale, "Claimed")
+        .to.emit(tokenPreSale, "TokenClaimed");
+
+      expect(await tokenPreSale.claimState(addr1.address)).to.equal(true);
+      expect(await tokenPreSale.claimState(addr2.address)).to.equal(true);
+
+      const addr1Balance = await token.balanceOf(addr1.address);
+      const addr2Balance = await token.balanceOf(addr2.address);
+
+      const rightbalance1 = calcTokenAmount(
+        contribution1,
+        await tokenPreSale.totalContribution(),
+        await tokenPreSale.maxContribution()
+      );
+      const rightbalance2 = calcTokenAmount(
+        contribution2,
+        await tokenPreSale.totalContribution(),
+        await tokenPreSale.maxContribution()
+      );
+
+      expect(addr1Balance).to.equal(rightbalance1);
+      expect(addr2Balance).to.equal(rightbalance2);
+    });
   });
 });
