@@ -134,9 +134,11 @@ contract TokenPreSale is Ownable, ReentrancyGuard {
 
     function finishSale() external nonReentrant {
         require(started, "Sale not started");
-        require(block.number >= endBlock, "Sale not ended");
         require(!finished, "Sale already finished");
-        require(block.number < deadlineBlock, "Finish deadline passed");
+        require(
+            block.number >= endBlock && block.number < deadlineBlock,
+            "Invalid finish time"
+        );
 
         finished = true;
         cooldownBlock = block.number + cooldownPeriod;

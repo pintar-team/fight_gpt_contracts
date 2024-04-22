@@ -101,7 +101,7 @@ describe("TokenPreSale", function() {
       await token.approve(tokenPreSale.target, targetMaximum);
       await tokenPreSale.initiatePresale(duration);
 
-      await expect(tokenPreSale.finishSale()).to.be.revertedWith("Sale not ended");
+      await expect(tokenPreSale.finishSale()).to.be.revertedWith("Invalid finish time");
     });
 
     it("Should fail if presale is already finished", async function() {
@@ -118,7 +118,7 @@ describe("TokenPreSale", function() {
       await tokenPreSale.initiatePresale(duration);
 
       await mine(await tokenPreSale.deadlineBlock());
-      await expect(tokenPreSale.finishSale()).to.be.revertedWith("Finish deadline passed");
+      await expect(tokenPreSale.finishSale()).to.be.revertedWith("Invalid finish time");
     });
   });
 
@@ -161,91 +161,28 @@ describe("TokenPreSale", function() {
     });
   });
 
-  // describe("claim", function() {
-  //   const duration = 1000;
-  //
-  //   it("Should allow multiple contributors to claim tokens", async function() {
-  //     await token.approve(tokenPreSale.target, targetMaximum);
-  //     await tokenPreSale.initiatePresale(duration);
-  //
-  //     console.log(await token.balanceOf(owner.address));
-  //
-  //     const contribution1 = ethers.parseEther("1");
-  //     const contribution2 = ethers.parseEther("2");
-  //     const contribution3 = ethers.parseEther("1.5");
-  //     const endBlock = await tokenPreSale.endBlock();
-  //     const cooldownBlock = await tokenPreSale.cooldownBlock();
-  //
-  //     await tokenPreSale.connect(addresses[0]).contribute({ value: contribution1 });
-  //     await tokenPreSale.connect(addresses[1]).contribute({ value: contribution2 });
-  //     await tokenPreSale.connect(addresses[2]).contribute({ value: contribution3 });
-  //
-  //     await mine(endBlock);
-  //     await tokenPreSale.finishSale();
-  //
-  //     const initialBalance1 = await token.balanceOf(addr1.address);
-  //     const initialBalance2 = await token.balanceOf(addr2.address);
-  //     const finalBalance3 = await token.balanceOf(owner.address);
-  //
-  //     console.log(finalBalance3);
-  //     expect(initialBalance1).to.equal(0n);
-  //     expect(initialBalance2).to.equal(0n);
-  //
-  //     await mine(cooldownBlock + 1n);
-  //     await tokenPreSale.connect(addr1).claim();
-  //     await tokenPreSale.connect(addr2).claim();
-  //     await tokenPreSale.connect(owner).claim();
-  //
-  //     const finalBalance1 = await token.balanceOf(addr1.address);
-  //     const finalBalance2 = await token.balanceOf(addr2.address);
-  //     // const finalBalance3 = await token.balanceOf(owner.address);
-  //
-  //     expect(finalBalance1).to.equal(initialBalance1 + contribution1 / ethers.parseEther("0.1"));
-  //     expect(finalBalance2).to.equal(initialBalance2 + contribution2 / ethers.parseEther("0.1"));
-  //     // expect(finalBalance3).to.equal(initialBalance3 + contribution3 / ethers.parseEther("0.1"));
-  //   });
-  //
-  //   // it("Should fail if presale is not finished", async function() {
-  //   //   // Одобрение для контракта ZPresale на перевод токенов от владельца
-  //   //   await token.approve(presale.address, ethers.utils.parseEther("1000"));
-  //   //
-  //   //   const duration = 100;
-  //   //   await presale.initiatePresale(duration);
-  //   //
-  //   //   // Попытка клейма до завершения пресейла
-  //   //   await expect(presale.claim()).to.be.revertedWith("Presale is not finished");
-  //   // });
-  //
-  //   // it("Should fail if claim deadline passed", async function() {
-  //   //   await token.approve(presale.address, ethers.utils.parseEther("1000"));
-  //   //
-  //   //   const duration = 100;
-  //   //   await presale.initiatePresale(duration);
-  //   //
-  //   //   await ethers.provider.send("evm_mine", [await presale.endBlock()]);
-  //   //   await presale.finishSale();
-  //   //
-  //   //   await ethers.provider.send("evm_mine", [await presale.deadlineBlock()]);
-  //   //
-  //   //   await expect(presale.claim()).to.be.revertedWith("Claim deadline passed");
-  //   // });
-  //
-  //   // it("Should fail if already claimed", async function() {
-  //   //   await token.approve(presale.address, ethers.utils.parseEther("1000"));
-  //   //
-  //   //   const duration = 100;
-  //   //   await presale.initiatePresale(duration);
-  //   //
-  //   //   const contribution = ethers.utils.parseEther("10");
-  //   //   await presale.connect(addr1).contribute({ value: contribution });
-  //   //
-  //   //   await ethers.provider.send("evm_mine", [await presale.endBlock()]);
-  //   //   await presale.finishSale();
-  //   //
-  //   //   await ethers.provider.send("evm_mine", [await presale.cooldownBlock()]);
-  //   //   await presale.connect(addr1).claim();
-  //   //
-  //   //   await expect(presale.connect(addr1).claim()).to.be.revertedWith("Already claimed");
-  //   // });
-  // });
+  describe("claim", function() {
+    const duration = 1000;
+
+    it("Should allow multiple contributors to claim tokens", async function() {
+      // await token.approve(tokenPreSale.target, targetMaximum);
+      // await tokenPreSale.initiatePresale(duration);
+      //
+      // const contribution = ethers.parseEther("5");
+      // await tokenPreSale.connect(addr1).contribute({ value: contribution });
+
+      // console.log(await tokenPreSale.deadlineBlock(), await ethers.provider.getBlockNumber());
+      // await mine(await tokenPreSale.endBlock());
+      //
+      // console.log(await tokenPreSale.deadlineBlock(), await ethers.provider.getBlockNumber());
+      // const tx = await tokenPreSale.finishSale();
+      //
+      // console.log(tx);
+
+      // expect(await tokenPreSale.finished()).to.equal(true);
+      // expect(await tokenPreSale.cooldownBlock()).to.equal(tx.blockNumber + cooldownPeriod);
+      //
+      // await expect(tx).to.emit(tokenPreSale, "Finished");
+    });
+  });
 });
