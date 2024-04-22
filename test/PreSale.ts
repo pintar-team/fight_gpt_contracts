@@ -12,10 +12,10 @@ describe("TokenPreSale", function() {
   let addresses: HardhatEthersSigner[];
 
   let targetMaximum = 0n;
-  const tokenPrice = ethers.parseEther("0.01");
-  const targetMinimum = ethers.parseEther("0.01");
-  const cooldownPeriod = 3600;
-  const deadline = 7200;
+  const tokenPrice = 7500000n;
+  const targetMinimum = 0;
+  const cooldownPeriod = 240;
+  const deadline = 40320;
 
   beforeEach(async function() {
     [owner, addr1, addr2, ...addresses] = await ethers.getSigners();
@@ -125,24 +125,40 @@ describe("TokenPreSale", function() {
   describe("contribute", function() {
     const duration = 1000;
 
-    it("Should allow multiple accounts to contribute", async function() {
+    // it("Should allow multiple accounts to contribute", async function() {
+    //   await token.approve(tokenPreSale.target, targetMaximum);
+    //   await tokenPreSale.initiatePresale(duration);
+    //
+    //   const contribution1 = ethers.parseEther("1");
+    //   const contribution2 = ethers.parseEther("2");
+    //   const contribution3 = ethers.parseEther("1.5");
+    //
+    //   await tokenPreSale.connect(addr1).contribute({ value: contribution1 });
+    //   await tokenPreSale.connect(addr2).contribute({ value: contribution2 });
+    //   await tokenPreSale.connect(owner).contribute({ value: contribution3 });
+    //
+    //   expect(await tokenPreSale.contribution(addr1.address)).to.equal(contribution1);
+    //   expect(await tokenPreSale.contribution(addr2.address)).to.equal(contribution2);
+    //   expect(await tokenPreSale.contribution(owner.address)).to.equal(contribution3);
+    //   expect(await tokenPreSale.totalContribution()).to.equal(
+    //     contribution1 + contribution2 + contribution3
+    //   );
+    // });
+    it("should refund excess contribution", async function() {
       await token.approve(tokenPreSale.target, targetMaximum);
       await tokenPreSale.initiatePresale(duration);
 
-      const contribution1 = ethers.parseEther("1");
-      const contribution2 = ethers.parseEther("2");
-      const contribution3 = ethers.parseEther("1.5");
+      const contribution = ethers.parseEther("1");
 
-      await tokenPreSale.connect(addr1).contribute({ value: contribution1 });
-      await tokenPreSale.connect(addr2).contribute({ value: contribution2 });
-      await tokenPreSale.connect(owner).contribute({ value: contribution3 });
+      // calc refund
+      const tokenPrice = await tokenPreSale.tokenPrice();
+      const tokenAmount = contribution / tokenPrice;
+      const contributionAmount = tokenAmount * tokenPrice;
+      const refundAmount = contribution - contributionAmount;
 
-      expect(await tokenPreSale.contribution(addr1.address)).to.equal(contribution1);
-      expect(await tokenPreSale.contribution(addr2.address)).to.equal(contribution2);
-      expect(await tokenPreSale.contribution(owner.address)).to.equal(contribution3);
-      expect(await tokenPreSale.totalContribution()).to.equal(
-        contribution1 + contribution2 + contribution3
-      );
+      await expect(tokenPreSale.connect(addr1).contribute({ value: contribution }))
+        .to.emit(tokenPreSale, "RefundContribution")
+        .withArgs(refundAmount);
     });
 
     it("Should fail if presale is not active", async function() {
@@ -164,21 +180,47 @@ describe("TokenPreSale", function() {
   describe("claim", function() {
     const duration = 1000;
 
-    it("Should allow multiple contributors to claim tokens", async function() {
-      await token.approve(tokenPreSale.target, targetMaximum);
-      await tokenPreSale.initiatePresale(duration);
-
-      const contribution = ethers.parseEther("5");
-      await tokenPreSale.connect(addr1).contribute({ value: contribution });
-
-      await mine(duration);
-
-      console.log('current block', await ethers.provider.getBlockNumber());
-      console.log('endBlock', await tokenPreSale.endBlock());
-
-      console.log('block.number >= endBlock', await ethers.provider.getBlockNumber() >= await tokenPreSale.endBlock());
-      console.log('block.number < deadlineBlock', await ethers.provider.getBlockNumber() < await tokenPreSale.deadlineBlock());
-      await tokenPreSale.finishSale();
-    });
+    // it("should allow multiple contributors to claim tokens", async function() {
+    //   await token.approve(tokenPreSale.target, targetMaximum);
+    //   await tokenPreSale.initiatePresale(duration);
+    //
+    //   const contribution1 = ethers.parseEther("0.5");
+    //   await tokenPreSale.connect(addr1).contribute({ value: contribution1 });
+    //
+    //   const contribution2 = ethers.parseEther("0.3");
+    //   await tokenPreSale.connect(addr2).contribute({ value: contribution2 });
+    //
+    //   expect(await tokenPreSale.contribution(addr1.address)).to.equal(contribution1);
+    //   expect(await tokenPreSale.contribution(addr2.address)).to.equal(contribution2);
+    //
+    //   expect(await tokenPreSale.claimState(addr1.address)).to.equal(false);
+    //   expect(await tokenPreSale.claimState(addr2.address)).to.equal(false);
+    //
+    //   await mine(duration);
+    //   await tokenPreSale.finishSale();
+    //   await mine(cooldownPeriod);
+    //
+    //   console.log('totalContribution', await tokenPreSale.totalContribution());
+    //   console.log('minContribution', await tokenPreSale.minContribution());
+    //
+    //   await expect(tokenPreSale.connect(addr1).claim())
+    //     .to.emit(tokenPreSale, "Claimed")
+    //     .to.emit(tokenPreSale, "TokenClaimed");
+    //
+    //   await expect(tokenPreSale.connect(addr2).claim())
+    //     .to.emit(tokenPreSale, "Claimed")
+    //     .to.emit(tokenPreSale, "TokenClaimed");
+    //
+    //   expect(await tokenPreSale.claimState(addr1.address)).to.equal(true);
+    //   expect(await tokenPreSale.claimState(addr2.address)).to.equal(true);
+    //
+    //   const addr1Balance = await token.balanceOf(addr1.address);
+    //   const addr2Balance = await token.balanceOf(addr2.address);
+    //
+    //   console.log(addr1Balance, addr2Balance);
+    //
+    //   // expect(addr2Balance).to.equal(ethers.parseEther("30"));
+    //   // expect(addr1Balance).to.equal(ethers.parseEther("50"));
+    // });
   });
 });

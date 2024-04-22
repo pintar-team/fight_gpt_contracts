@@ -113,6 +113,8 @@ contract TokenPreSale is Ownable, ReentrancyGuard {
         require(block.number >= cooldownBlock, "Claim cooldown not ended");
         require(!claimState[msg.sender], "Already claimed");
 
+        processClaim();
+
         claimState[msg.sender] = true;
 
         emit Claimed();
@@ -155,6 +157,7 @@ contract TokenPreSale is Ownable, ReentrancyGuard {
             emit RefundContribution(currentContribution);
         } else {
             uint256 realContribution;
+
             if (totalContribution > maxContribution) {
                 realContribution =
                     (currentContribution * maxContribution) /
@@ -165,6 +168,7 @@ contract TokenPreSale is Ownable, ReentrancyGuard {
 
             uint256 tokenAmount = realContribution / tokenPrice;
             uint256 spentAmount;
+
             if (totalContribution > maxContribution) {
                 spentAmount =
                     (currentContribution * maxContribution) /
