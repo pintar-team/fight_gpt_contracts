@@ -125,25 +125,26 @@ describe("TokenPreSale", function() {
   describe("contribute", function() {
     const duration = 1000;
 
-    // it("Should allow multiple accounts to contribute", async function() {
-    //   await token.approve(tokenPreSale.target, targetMaximum);
-    //   await tokenPreSale.initiatePresale(duration);
-    //
-    //   const contribution1 = ethers.parseEther("1");
-    //   const contribution2 = ethers.parseEther("2");
-    //   const contribution3 = ethers.parseEther("1.5");
-    //
-    //   await tokenPreSale.connect(addr1).contribute({ value: contribution1 });
-    //   await tokenPreSale.connect(addr2).contribute({ value: contribution2 });
-    //   await tokenPreSale.connect(owner).contribute({ value: contribution3 });
-    //
-    //   expect(await tokenPreSale.contribution(addr1.address)).to.equal(contribution1);
-    //   expect(await tokenPreSale.contribution(addr2.address)).to.equal(contribution2);
-    //   expect(await tokenPreSale.contribution(owner.address)).to.equal(contribution3);
-    //   expect(await tokenPreSale.totalContribution()).to.equal(
-    //     contribution1 + contribution2 + contribution3
-    //   );
-    // });
+    it("Should allow multiple accounts to contribute", async function() {
+      await token.approve(tokenPreSale.target, targetMaximum);
+      await tokenPreSale.initiatePresale(duration);
+
+      const contribution1 = tokenPrice * 2n;
+      const contribution2 = tokenPrice * 3n;
+      const contribution3 = tokenPrice * 4n;
+
+      await tokenPreSale.connect(addr1).contribute({ value: contribution1 });
+      await tokenPreSale.connect(addr2).contribute({ value: contribution2 });
+      await tokenPreSale.connect(owner).contribute({ value: contribution3 });
+
+      expect(await tokenPreSale.contribution(addr1.address)).to.equal(contribution1);
+      expect(await tokenPreSale.contribution(addr2.address)).to.equal(contribution2);
+      expect(await tokenPreSale.contribution(owner.address)).to.equal(contribution3);
+      expect(await tokenPreSale.totalContribution()).to.equal(
+        contribution1 + contribution2 + contribution3
+      );
+    });
+
     it("should refund excess contribution", async function() {
       await token.approve(tokenPreSale.target, targetMaximum);
       await tokenPreSale.initiatePresale(duration);
