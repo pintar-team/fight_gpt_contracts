@@ -5,19 +5,19 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/math/SafeCast.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
-contract TokenPreSale {
+contract TokenPreSale is Ownable, ReentrancyGuard {
     using SafeERC20 for IERC20;
     using SafeCast for uint256;
 
     IERC20 public immutable token;
-    address public immutable owner;
     uint256 public immutable tokenPrice;
     uint256 public immutable targetMaximum;
     uint256 public immutable targetMinimum;
     uint256 public immutable cooldownPeriod;
     uint256 public immutable deadline;
-
     uint256 public immutable minContribution;
     uint256 public immutable maxContribution;
 
@@ -58,11 +58,6 @@ contract TokenPreSale {
         _;
     }
 
-    modifier onlyOwner() {
-        require(msg.sender == owner, "Not the owner");
-        _;
-    }
-
     constructor(
         address _token,
         uint256 _tokenPrice,
@@ -70,14 +65,13 @@ contract TokenPreSale {
         uint256 _targetMinimum,
         uint256 _cooldownPeriod,
         uint256 _deadline
-    ) {
+    ) Ownable(msg.sender) {
         token = IERC20(_token);
         tokenPrice = _tokenPrice;
         targetMaximum = _targetMaximum;
         targetMinimum = _targetMinimum;
         cooldownPeriod = _cooldownPeriod;
         deadline = _deadline;
-        owner = msg.sender;
 
         minContribution = tokenPrice * targetMinimum;
         maxContribution = tokenPrice * targetMaximum;
@@ -88,7 +82,7 @@ contract TokenPreSale {
         deadlineBlock = block.number;
     }
 
-    function contribute() external payable onlyWhenActive {
+    function contribute() external payable onlyWhenActive nonReentrant {
         uint256 tokenAmount = msg.value / tokenPrice;
         require(tokenAmount > 0, "Invalid contribution amount");
 
@@ -112,7 +106,7 @@ contract TokenPreSale {
         emit ContributionAdded(msg.value, newContribution);
     }
 
-    function claim() external onlyWhenFinished {
+    function claim() external onlyWhenFinished nonReentrant {
         require(block.number < deadlineBlock, "Claim deadline passed");
         require(block.number >= cooldownBlock, "Claiming is on cooldown");
         require(claimState[msg.sender] == 0, "Already claimed");
@@ -122,7 +116,7 @@ contract TokenPreSale {
         emit Claimed();
     }
 
-    function initiatePresale(uint256 duration) external onlyOwner {
+    function initiatePresale(uint256 duration) external onlyOwner nonReentrant {
         require(!started, "Presale already started");
 
         startBlock = block.number + 1;
@@ -134,6 +128,19 @@ contract TokenPreSale {
         token.safeTransferFrom(msg.sender, address(this), targetMaximum);
 
         emit SaleInitiated(startBlock, endBlock);
+    }
+
+    function finishSale() external nonReentrant {
+        require(started, "Sale not started");
+        require(block.number >= endBlock, "Sale not ended");
+        require(!finished, "Sale already finished");
+        require(block.number < deadlineBlock, "Finish deadline passed");
+
+        finished = true;
+        cooldownBlock = block.number + cooldownPeriod;
+
+        processFinish();
+        emit Finished();
     }
 
     function processClaim() private {
@@ -172,6 +179,32 @@ contract TokenPreSale {
             if (tokenAmount > 0) {
                 token.safeTransfer(msg.sender, tokenAmount);
                 emit TokenClaimed(tokenAmount);
+            }
+        }
+    }
+
+    function processFinish() private {
+        if (totalContribution < minContribution) {
+            uint256 maxTokenAmount = maxContribution / tokenPrice;
+            token.transfer(owner(), maxTokenAmount);
+            emit RefundToken(maxTokenAmount);
+        } else {
+            uint256 fixContribution = totalContribution > maxContribution
+                ? maxContribution
+                : totalContribution;
+            uint256 maxTokenAmount = maxContribution / tokenPrice;
+            uint256 soldTokenAmount = fixContribution / tokenPrice;
+            uint256 fundAmount = soldTokenAmount * tokenPrice;
+            uint256 refundTokenAmount = maxTokenAmount - soldTokenAmount;
+
+            if (fundAmount > 0) {
+                payable(owner()).transfer(fundAmount);
+                emit FundSale(fundAmount);
+            }
+
+            if (refundTokenAmount > 0) {
+                token.transfer(owner(), refundTokenAmount);
+                emit RefundToken(refundTokenAmount);
             }
         }
     }
