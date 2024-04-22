@@ -31,7 +31,7 @@ contract TokenPreSale is Ownable, ReentrancyGuard {
     bool public finishedFallback;
 
     mapping(address => uint256) public contribution;
-    mapping(address => uint256) public claimState;
+    mapping(address => bool) public claimState;
 
     uint256 public totalContribution;
 
@@ -106,13 +106,15 @@ contract TokenPreSale is Ownable, ReentrancyGuard {
         emit ContributionAdded(msg.value, newContribution);
     }
 
-    function claim() external onlyWhenFinished nonReentrant {
+    function claim() external nonReentrant {
+        require(started, "Sale not started");
+        require(finished, "Sale not finished");
         require(block.number < deadlineBlock, "Claim deadline passed");
-        require(block.number >= cooldownBlock, "Claiming is on cooldown");
-        require(claimState[msg.sender] == 0, "Already claimed");
+        require(block.number >= cooldownBlock, "Claim cooldown not ended");
+        require(!claimState[msg.sender], "Already claimed");
 
-        claimState[msg.sender] = 1;
-        processClaim();
+        claimState[msg.sender] = true;
+
         emit Claimed();
     }
 
